@@ -20,7 +20,7 @@ public:
 	void start(void);
 
 
-	KinectDevice* m_device;
+	//KinectDevice* m_device;
 	bool m_running; // Set private and move to getter?
 	void thread_func();
 	cv::Mat m_depth_mat;
