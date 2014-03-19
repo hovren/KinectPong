@@ -11,7 +11,7 @@
 #include <libfreenect/libfreenect.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
-void *freenect_threadfunc(void *arg)
+static void* freenect_threadfunc(void *arg)
 {
 	KinectSource* kinect_source = (KinectSource*) arg;
 	kinect_source->thread_func();
@@ -23,6 +23,8 @@ KinectSource::KinectSource() {
 	m_running = true;
 	m_depth_mat.create(cv::Size(640, 480), CV_16UC1);
 	m_rgb_mat.create(cv::Size(640, 480), CV_8UC3);
+	pthread_mutex_init(&m_depth_lock, NULL);
+	pthread_mutex_init(&m_rgb_lock, NULL);
 }
 
 KinectSource::~KinectSource() {
@@ -58,7 +60,7 @@ class MyFreenectDevice : public Freenect::FreenectDevice {
 	}
 	// Do not call directly even in child
 	void VideoCallback(void* _rgb, uint32_t timestamp) {
-		std::cout << "RGB callback" << std::endl;
+//		std::cout << "RGB callback" << std::endl;
 		m_rgb_mutex.lock();
 		uint8_t* rgb = static_cast<uint8_t*>(_rgb);
 		rgbMat.data = rgb;
@@ -67,7 +69,7 @@ class MyFreenectDevice : public Freenect::FreenectDevice {
 	};
 	// Do not call directly even in child
 	void DepthCallback(void* _depth, uint32_t timestamp) {
-		std::cout << "Depth callback" << std::endl;
+//		std::cout << "Depth callback" << std::endl;
 		m_depth_mutex.lock();
 		uint16_t* depth = static_cast<uint16_t*>(_depth);
 		depthMat.data = (uchar*) depth;
@@ -115,45 +117,61 @@ class MyFreenectDevice : public Freenect::FreenectDevice {
 };
 
 void KinectSource::start(void) {
+	m_running = true;
+	pthread_create(&m_thread, NULL, freenect_threadfunc, (void*) this);
+}
+
+void KinectSource::stop(void) {
+	m_running = false;
+	std::cout << "Waiting for thread to exit" << std::endl;
+	pthread_join(m_thread, NULL);
+}
+
+void KinectSource::get_pair(cv::Mat& rgb, cv::Mat& depth) {
+	pthread_mutex_lock(&m_rgb_lock);
+	pthread_mutex_lock(&m_depth_lock);
+	m_rgb_mat.copyTo(rgb);
+	m_depth_mat.copyTo(depth);
+	pthread_mutex_unlock(&m_depth_lock);
+	pthread_mutex_unlock(&m_rgb_lock);
+}
+
+void KinectSource::thread_func() {
     //The next two lines must be changed as Freenect::Freenect isn't a template but the method createDevice:
     //Freenect::Freenect<MyFreenectDevice> freenect;
     //MyFreenectDevice& device = freenect.createDevice(0);
     //by these two lines:
+	std::cout << "Starting kinect thread" << std::endl;
     Freenect::Freenect freenect;
 
-    MyFreenectDevice& m_device = freenect.createDevice<MyFreenectDevice>(0);
+    MyFreenectDevice& device = freenect.createDevice<MyFreenectDevice>(0);
 
-	namedWindow("rgb",CV_WINDOW_AUTOSIZE);
-	namedWindow("depth",CV_WINDOW_AUTOSIZE);
-	m_device.startVideo();
-	m_device.startDepth();
-	cv::Mat depth_show_mat;
+	//namedWindow("rgb",CV_WINDOW_AUTOSIZE);
+	//namedWindow("depth",CV_WINDOW_AUTOSIZE);
+	device.startVideo();
+	device.startDepth();
 	int iter = 0;
 	while (m_running) {
-		m_device.getVideo(m_rgb_mat);
-		m_device.getDepth(m_depth_mat);
-		cv::imshow("rgb", m_rgb_mat);
-		m_depth_mat.convertTo(depth_show_mat, CV_8UC1, 255.0/2048.0);
-		cv::imshow("depth",depth_show_mat);
-		char k = cvWaitKey(5);
-		if( k == 27 ){
-			cvDestroyWindow("rgb");
-			cvDestroyWindow("depth");
-			break;
-		}
+		pthread_mutex_lock(&m_rgb_lock);
+		device.getVideo(m_rgb_mat);
+		pthread_mutex_unlock(&m_rgb_lock);
 
-		if(iter >= 1000)
-			m_running = false;
+		pthread_mutex_lock(&m_depth_lock);
+		device.getDepth(m_depth_mat);
+		pthread_mutex_unlock(&m_depth_lock);
+//		std::cout << "Got data" << std::endl;
 
-		iter++;
+		//cv::imshow("rgb", m_rgb_mat);
+//		m_depth_mat.convertTo(depth_show_mat, CV_8UC1, 255.0/2048.0);
+		//cv::imshow("depth",depth_show_mat);
+//		char k = cvWaitKey(5);
+//		if( k == 27 ){
+//			cvDestroyWindow("rgb");
+//			cvDestroyWindow("depth");
+//			break;
+//		}
 	}
 
-	m_device.stopVideo();
-	m_device.stopDepth();
-}
-
-void KinectSource::thread_func() {
-	while (m_running) {
-		std::cout << "Hello" << std::endl;
-	}
+	device.stopVideo();
+	device.stopDepth();
 }

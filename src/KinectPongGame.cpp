@@ -6,6 +6,7 @@
  */
 
 #include <iostream>
+#include <unistd.h>
 
 #include "KinectPongGame.h"
 
@@ -37,16 +38,24 @@ void KinectPongGame::run(void) {
 			m_state = Exit;
 		}
 	}
+
+	m_kinect.stop();
 }
 
 void KinectPongGame::handle_init(void) {
 	std::cout << "Initialising" << std::endl;
 	m_kinect.start();
 	std::cout << "Kinect started" << std::endl;
-	change_state(Exit);
+	cv::namedWindow("rgb", CV_WINDOW_AUTOSIZE);
+	change_state(WaitForPlayers);
 }
 
 void KinectPongGame::handle_wait_for_players(void) {
+	cv::Mat rgb, depth;
+	m_kinect.get_pair(rgb, depth);
+	cv::imshow("rgb", rgb);
+	sleep(1);
+	std::cout << "Loopeliloop" << std::endl;
 }
 
 void KinectPongGame::change_state(enum State new_state) {
