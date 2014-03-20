@@ -14,6 +14,10 @@ ESPEAK_OBJS = src/EspeakInterface.o src/espeak_interface_test.o
 EspeakInterface: $(ESPEAK_OBJS)  
 	 $(CXX) -o espeak_interface_test $(ESPEAK_OBJS) -lportaudio -lespeak
 
+PANTILT_OBJS = src/PanTiltInterface.o src/pan_tilt_interface_test.o
+PanTiltInterface: $(PANTILT_OBJS)  
+	 $(CXX) -o pan_tilt_interface_test $(PANTILT_OBJS) -lboost_system
+
 all:	$(TARGET)
 
 clean:
