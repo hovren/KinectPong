@@ -1,8 +1,8 @@
-CXXFLAGS =	-O2 -g -Wall -fmessage-length=0
+CXXFLAGS =	-O2 -g -Wall -fmessage-length=0 -I/usr/include/libfreenect
 
-OBJS =		src/main.o src/KinectPongGame.o
+OBJS =		src/main.o src/KinectPongGame.o src/KinectInput.o
 
-LIBS =
+LIBS = -lopencv_core -lopencv_highgui -lopencv_imgproc -lfreenect -lSDL2 -lSDL2_image
 
 TARGET =	KinectPong
 
