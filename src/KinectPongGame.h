@@ -8,24 +8,26 @@
 #ifndef KINECTPONGGAME_H_
 #define KINECTPONGGAME_H_
 
-#include "KinectSource.h"
+#include <SDL2/SDL.h>
+#include "KinectInput.h"
 
 class KinectPongGame {
 public:
 	KinectPongGame();
 	virtual ~KinectPongGame();
+	bool init(void);
 	void run(void);
 
-	enum State {Init, WaitForPlayers, IdentifyPlayers, Playing, ShowResults, Exit};
+	void on_new_rgb_frame(cv::Mat& image);
+	void on_new_depth_frame(cv::Mat& image);
 
 private:
-	void change_state(enum State new_state);
-	void handle_init(void);
-	void handle_wait_for_players(void);
-	void handle_identify_players(void);
+	KinectInput m_kinect;
 
-	enum State m_state;
-	KinectSource m_kinect;
+	// Rendering primitives
+	SDL_Window* m_window;
+	SDL_Renderer* m_renderer;
+	SDL_Texture* m_rgb_tex;
 };
 
 #endif /* KINECTPONGGAME_H_ */
