@@ -34,7 +34,7 @@ class KinectInputDevice : public Freenect::FreenectDevice {
 
 class KinectInput {
 public:
-	KinectInput();
+	KinectInput(bool registered = false);
 	void start();
 	void stop();
 	bool poll_data(cv::Mat& rgb, cv::Mat& depth);
@@ -42,6 +42,7 @@ public:
 private:
 	KinectInputDevice& m_device;
 	bool m_running;
+	bool m_registered;
 };
 
 #endif /* KINECTINPUT_H_ */
