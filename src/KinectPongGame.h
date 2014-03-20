@@ -42,6 +42,7 @@ public:
 
 	void set_next_state(int new_state);
 	SDL_Renderer* renderer() { return m_renderer; }
+	KinectInput* get_kinect() { return &m_kinect; }
 
 private:
 	KinectInput m_kinect;
@@ -70,6 +71,7 @@ public:
 
 private:
 	SDL_Surface* m_background;
+	SDL_Surface* m_text;
 };
 
 #endif /* KINECTPONGGAME_H_ */

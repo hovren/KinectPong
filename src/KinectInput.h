@@ -38,9 +38,10 @@ public:
 	void start();
 	void stop();
 	bool poll_data(cv::Mat& rgb, cv::Mat& depth);
-
+	bool is_running() { return m_running;};
 private:
 	KinectInputDevice& m_device;
+	bool m_running;
 };
 
 #endif /* KINECTINPUT_H_ */
