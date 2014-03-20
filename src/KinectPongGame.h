@@ -40,6 +40,7 @@ private:
 	SDL_Window* m_window;
 	SDL_Renderer* m_renderer;
 	SDL_Texture* m_rgb_tex;
+	SDL_Palette* m_gray_palette;
 };
 
 #endif /* KINECTPONGGAME_H_ */

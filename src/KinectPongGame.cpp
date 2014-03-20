@@ -16,12 +16,18 @@
 
 #include "states/GameStates.h"
 
-KinectPongGame::KinectPongGame() {
-
+KinectPongGame::KinectPongGame() : m_kinect(true){
+	m_gray_palette = SDL_AllocPalette(256);
+	for (int i=0; i < 256; ++i) {
+		m_gray_palette->colors[i].a = 255;
+		m_gray_palette->colors[i].r = i;
+		m_gray_palette->colors[i].g = i;
+		m_gray_palette->colors[i].b = i;
+	}
 }
 
 KinectPongGame::~KinectPongGame() {
-
+	SDL_FreePalette(m_gray_palette);
 }
 
 void KinectPongGame::run(void) {
@@ -139,9 +145,11 @@ SDL_Texture* KinectPongGame::texture_from_mat(cv::Mat& image) {
 												 0x0000ff,0x00ff00,0xff0000,0);
 	}
 	else {
+
 		surf = SDL_CreateRGBSurfaceFrom(image.data, image.cols, image.rows,
-														 8, image.cols*image.channels(),
+														 8, image.cols,
 														 0,0,0,0);
+		SDL_SetSurfacePalette(surf, m_gray_palette);
 	}
 	if (surf == NULL) {
 		std::cout << "failed to create surface: " << SDL_GetError() << std::endl;

@@ -22,6 +22,10 @@ ROBOREF_OBJS = src/RoboRef.o src/EspeakInterface.o src/PanTiltInterface.o src/ro
 RoboRef: $(ROBOREF_OBJS)  
 	 $(CXX) -o roboref_test $(ROBOREF_OBJS) -lboost_system -lportaudio -lespeak -lopencv_core -lopencv_highgui
 
+KINECTTEST_OBJS = src/kinect_test.o src/KinectInput.o
+kinect_test: $(KINECTTEST_OBJS)  
+	 $(CXX) -o kinect_test $(KINECTTEST_OBJS) -lopencv_core -lopencv_highgui -lfreenect
+
 all:	$(TARGET)
 
 clean:

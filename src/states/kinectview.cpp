@@ -55,10 +55,10 @@ void KinectViewState::render() {
 	if (m_rgb_tex && m_depth_tex) {
 		SDL_Rect depth_dst = {1280 - 400, 960-300, 400, 300};
 		SDL_RenderClear(renderer);
-//		SDL_RenderCopy(renderer, m_rgb_tex, NULL, NULL);
-//		SDL_RenderCopy(renderer, m_depth_tex, NULL, &depth_dst);
-		SDL_RenderCopy(renderer, m_depth_tex, NULL, NULL);
-		SDL_RenderCopy(renderer, m_rgb_tex, NULL, &depth_dst);
+		SDL_RenderCopy(renderer, m_rgb_tex, NULL, NULL);
+		SDL_RenderCopy(renderer, m_depth_tex, NULL, &depth_dst);
+//		SDL_RenderCopy(renderer, m_depth_tex, NULL, NULL);
+//		SDL_RenderCopy(renderer, m_rgb_tex, NULL, &depth_dst);
 		SDL_RenderPresent(renderer);
 	}
 }
