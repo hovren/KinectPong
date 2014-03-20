@@ -5,13 +5,16 @@
  *      Author: hannes
  */
 
+#include "KinectPongGame.h"
+
 #include <iostream>
 #include <unistd.h>
 #include <opencv2/core/core.hpp>
 #include <libfreenect/libfreenect.hpp>
-#include "KinectPongGame.h"
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
+
+#include "states/GameStates.h"
 
 KinectPongGame::KinectPongGame() {
 
@@ -110,8 +113,14 @@ void KinectPongGame::change_state() {
 		// Change the state
 		switch (m_next_state) {
 		case STATE_INTRO:
+			m_current_state = new IntroState(this);
+			break;
+		case STATE_KINECTVIEW:
+			m_current_state = new KinectViewState(this);
 			break;
 		}
+
+		std::cout << "Switching state: " << m_state_id << " to " << m_next_state << std::endl;
 
 		// Change ID
 		m_state_id = m_next_state;
@@ -122,9 +131,18 @@ void KinectPongGame::change_state() {
 }
 
 SDL_Texture* KinectPongGame::texture_from_mat(cv::Mat& image) {
-	SDL_Surface* surf = SDL_CreateRGBSurfaceFrom(image.data, image.cols, image.rows,
+	SDL_Surface* surf;
+
+	if (image.channels() == 3) {
+		surf = SDL_CreateRGBSurfaceFrom(image.data, image.cols, image.rows,
 												 24, image.cols*image.channels(),
 												 0x0000ff,0x00ff00,0xff0000,0);
+	}
+	else {
+		surf = SDL_CreateRGBSurfaceFrom(image.data, image.cols, image.rows,
+														 8, image.cols*image.channels(),
+														 0,0,0,0);
+	}
 	if (surf == NULL) {
 		std::cout << "failed to create surface: " << SDL_GetError() << std::endl;
 		return NULL;
@@ -132,84 +150,7 @@ SDL_Texture* KinectPongGame::texture_from_mat(cv::Mat& image) {
 	SDL_Texture* tex = SDL_CreateTextureFromSurface(m_renderer, surf);
 	if (tex == NULL) {
 			std::cout << "failed to create texture: " << SDL_GetError() << std::endl;
-			return NULL;
 	}
 	SDL_FreeSurface(surf);
 	return tex;
-}
-
-IntroState::IntroState(KinectPongGame* game) {
-	m_background = IMG_Load("window_icon.png");
-	if (!m_background) {
-		std::cout << "Error loading image: " << SDL_GetError() << std::endl;
-	}
-	else {
-		std::cout << "Image loaded" << std::endl;
-	}
-
-	TTF_Font* font = TTF_OpenFont("font.ttf", 40);
-	if (!font) {
-		std::cout << "Error loading font: " << TTF_GetError() << std::endl;
-	}
-
-	SDL_Color text_color = {255, 0, 0, 255};
-	m_text = TTF_RenderText_Blended(font, "Initializing Kinect", text_color);
-	if (!m_text) {
-		std::cout << "Error: " << TTF_GetError() << std::endl;
-	}
-
-	m_game = game;
-}
-
-IntroState::~IntroState() {
-	SDL_FreeSurface(m_background);
-	SDL_FreeSurface(m_text);
-}
-
-void IntroState::handle_events(KinectInput* kinect) {
-	SDL_Event e;
-	while (SDL_PollEvent(&e)) {
-		switch (e.type) {
-		case SDL_QUIT:
-		case SDL_KEYDOWN:
-			m_game->set_next_state(STATE_EXIT);
-			break;
-		}
-	} // end SDL_PollEvent
-}
-
-void IntroState::handle_logic() {
-	if (!m_game->get_kinect()->is_running() && SDL_GetTicks() > 1000) {
-		std::cout << "Starting Kinect input source" << std::endl;
-		m_game->get_kinect()->start(); // This takes a while
-	}
-	else if (m_game->get_kinect()->is_running()) {
-		m_game->set_next_state(STATE_EXIT);
-	}
-}
-
-void IntroState::render() {
-	SDL_Renderer* renderer = m_game->renderer();
-	SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, m_background);
-	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-	SDL_RenderClear(renderer);
-	//SDL_RenderCopy(renderer, tex, NULL, NULL);
-	if (m_game->get_kinect()->is_running()) {
-		SDL_Rect top_left;
-		top_left.x = 1280 / 2 - 100/2;
-		top_left.y = 960 / 2 - 100/2;
-		top_left.w = 100;
-		top_left.h = 100;
-		SDL_RenderCopy(renderer, tex, NULL, &top_left);
-	}
-	else {
-		SDL_Texture* text_tex = SDL_CreateTextureFromSurface(renderer, m_text);
-		SDL_Rect dst;
-		dst.x = 1280 / 2 - m_text->w / 2;
-		dst.y = 960 / 2 - m_text->h / 2;
-		dst.w = m_text->w;
-		dst.h = m_text->h;
-		SDL_RenderCopy(renderer, text_tex, NULL, &dst);
-	}
-	SDL_RenderPresent(renderer);
 }
