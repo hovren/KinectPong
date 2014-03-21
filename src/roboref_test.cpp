@@ -17,13 +17,6 @@ int main(int argc, char** argv)
 	RoboRef my_ref;
 	my_ref.connect("/dev/ttyUSB0");
 
-//	my_ref.speak("This is a test of the robotic referee system");
-//	my_ref.set_pan_tilt_angles(30, 10);
-//	my_ref.speak("It can look around and communicate with players");
-//	my_ref.set_pan_tilt_angles(-30, 10);
-//	my_ref.speak("and hopefully target correctly in the image plane");
-//	my_ref.set_pan_tilt_angles(0, 0);
-
 	cv::VideoCapture my_capture;
 	my_capture.open(0);
 	std::string win_name = "target test";
