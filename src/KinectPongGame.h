@@ -11,27 +11,9 @@
 #include <SDL2/SDL.h>
 #include <opencv2/core/core.hpp>
 #include "KinectInput.h"
+//#include "states/GameStates.h"
 
-class KinectPongGame;
-
-class GameState {
-public:
-	virtual void handle_events(KinectInput* kinect_input) = 0;
-	virtual void handle_logic() = 0;
-	virtual void render() = 0;
-	virtual ~GameState(){};
-protected:
-	KinectPongGame* m_game;
-};
-
-enum GameStates {
-	STATE_NULL,
-	STATE_INTRO,
-	STATE_WAITFORPLAYERS,
-	STATE_PLAYING,
-	STATE_SHOWSCORE,
-	STATE_EXIT
-};
+class GameState;
 
 class KinectPongGame {
 public:
@@ -42,6 +24,8 @@ public:
 
 	void set_next_state(int new_state);
 	SDL_Renderer* renderer() { return m_renderer; }
+	KinectInput* get_kinect() { return &m_kinect; }
+	SDL_Texture* texture_from_mat(cv::Mat&);
 
 private:
 	KinectInput m_kinect;
@@ -53,23 +37,10 @@ private:
 	void change_state();
 
 	// Rendering
-	SDL_Texture* texture_from_mat(cv::Mat&);
 	SDL_Window* m_window;
 	SDL_Renderer* m_renderer;
 	SDL_Texture* m_rgb_tex;
-};
-
-
-class IntroState : public GameState {
-public:
-	IntroState(KinectPongGame*);
-	~IntroState();
-	void handle_events(KinectInput*);
-	void handle_logic(); // No logic required
-	void render();
-
-private:
-	SDL_Surface* m_background;
+	SDL_Palette* m_gray_palette;
 };
 
 #endif /* KINECTPONGGAME_H_ */

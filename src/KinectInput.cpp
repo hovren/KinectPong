@@ -50,20 +50,28 @@ void KinectInputDevice::DepthCallback(void* _depth, uint32_t timestamp) {
 
 static Freenect::Freenect freenect;
 
+
 KinectInput::KinectInput(bool registered) : m_device(freenect.createDevice<KinectInputDevice>(0)){
 	m_registered = registered;
+	m_running = false;
 }
 
 void KinectInput::start() {
 	m_device.startDepth();
-	if(m_registered)
-		m_device.setDepthFormat(FREENECT_DEPTH_REGISTERED);
-	m_device.startVideo();
+	if (!m_running) {
+		if(m_registered)
+				m_device.setDepthFormat(FREENECT_DEPTH_REGISTERED);
+		m_device.startVideo();
+		m_running = true;
+	}
 }
 
 void KinectInput::stop() {
-	m_device.stopDepth();
-	m_device.stopVideo();
+	if (m_running) {
+		m_device.stopDepth();
+		m_device.stopVideo();
+		m_running = false;
+	}
 }
 
 bool KinectInputDevice::poll_data(cv::Mat& rgb, cv::Mat& depth) {

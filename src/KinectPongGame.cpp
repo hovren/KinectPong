@@ -5,19 +5,29 @@
  *      Author: hannes
  */
 
+#include "KinectPongGame.h"
+
 #include <iostream>
 #include <unistd.h>
 #include <opencv2/core/core.hpp>
 #include <libfreenect/libfreenect.hpp>
-#include "KinectPongGame.h"
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 
-KinectPongGame::KinectPongGame() {
+#include "states/GameStates.h"
 
+KinectPongGame::KinectPongGame() : m_kinect(true){
+	m_gray_palette = SDL_AllocPalette(256);
+	for (int i=0; i < 256; ++i) {
+		m_gray_palette->colors[i].a = 255;
+		m_gray_palette->colors[i].r = i;
+		m_gray_palette->colors[i].g = i;
+		m_gray_palette->colors[i].b = i;
+	}
 }
 
 KinectPongGame::~KinectPongGame() {
-
+	SDL_FreePalette(m_gray_palette);
 }
 
 void KinectPongGame::run(void) {
@@ -67,9 +77,14 @@ void KinectPongGame::run(void) {
 }
 
 
-bool KinectPongGame::init(void) {
+bool KinectPongGame::init() {
 	if(SDL_Init(SDL_INIT_EVERYTHING) != 0) {
 		std::cout << "SDL_Init Error: " << SDL_GetError() << std::endl;
+		return false;
+	}
+
+	if (TTF_Init() != 0) {
+		std::cout << "TTF_Init Error: " << SDL_GetError() << std::endl;
 		return false;
 	}
 
@@ -84,10 +99,6 @@ bool KinectPongGame::init(void) {
 		std::cout << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
 		return false;
 	}
-
-	std::cout << "Starting Kinect input source" << std::endl;
-	m_kinect.start();
-
 	return true;
 }
 
@@ -108,8 +119,14 @@ void KinectPongGame::change_state() {
 		// Change the state
 		switch (m_next_state) {
 		case STATE_INTRO:
+			m_current_state = new IntroState(this);
+			break;
+		case STATE_KINECTVIEW:
+			m_current_state = new KinectViewState(this);
 			break;
 		}
+
+		std::cout << "Switching state: " << m_state_id << " to " << m_next_state << std::endl;
 
 		// Change ID
 		m_state_id = m_next_state;
@@ -120,9 +137,20 @@ void KinectPongGame::change_state() {
 }
 
 SDL_Texture* KinectPongGame::texture_from_mat(cv::Mat& image) {
-	SDL_Surface* surf = SDL_CreateRGBSurfaceFrom(image.data, image.cols, image.rows,
+	SDL_Surface* surf;
+
+	if (image.channels() == 3) {
+		surf = SDL_CreateRGBSurfaceFrom(image.data, image.cols, image.rows,
 												 24, image.cols*image.channels(),
 												 0x0000ff,0x00ff00,0xff0000,0);
+	}
+	else {
+
+		surf = SDL_CreateRGBSurfaceFrom(image.data, image.cols, image.rows,
+														 8, image.cols,
+														 0,0,0,0);
+		SDL_SetSurfacePalette(surf, m_gray_palette);
+	}
 	if (surf == NULL) {
 		std::cout << "failed to create surface: " << SDL_GetError() << std::endl;
 		return NULL;
@@ -130,47 +158,7 @@ SDL_Texture* KinectPongGame::texture_from_mat(cv::Mat& image) {
 	SDL_Texture* tex = SDL_CreateTextureFromSurface(m_renderer, surf);
 	if (tex == NULL) {
 			std::cout << "failed to create texture: " << SDL_GetError() << std::endl;
-			return NULL;
 	}
 	SDL_FreeSurface(surf);
 	return tex;
-}
-
-IntroState::IntroState(KinectPongGame* game) {
-	m_background = IMG_Load("window_icon.png");
-	if (!m_background) {
-		std::cout << "Error loading image: " << SDL_GetError() << std::endl;
-	}
-	else {
-		std::cout << "Image loaded" << std::endl;
-	}
-	m_game = game;
-}
-
-IntroState::~IntroState() {
-	SDL_FreeSurface(m_background);
-}
-
-void IntroState::handle_events(KinectInput* kinect) {
-	SDL_Event e;
-	while (SDL_PollEvent(&e)) {
-		switch (e.type) {
-		case SDL_QUIT:
-		case SDL_KEYDOWN:
-			m_game->set_next_state(STATE_EXIT);
-			break;
-		}
-	} // end SDL_PollEvent
-}
-
-void IntroState::handle_logic() {
-
-}
-
-void IntroState::render() {
-	SDL_Renderer* renderer = m_game->renderer();
-	SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, m_background);
-	SDL_RenderClear(renderer);
-	SDL_RenderCopy(renderer, tex, 0, 0);
-	SDL_RenderPresent(renderer);
 }

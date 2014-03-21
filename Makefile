@@ -1,8 +1,8 @@
-CXXFLAGS =	-O2 -g -Wall -fmessage-length=0 -I/usr/include/libfreenect
+CXXFLAGS =	-O2 -g -Wall -fmessage-length=0 -I/usr/include/libfreenect -I/usr/include/SDL2 -L/usr/local/lib
 
-OBJS =		src/main.o src/KinectPongGame.o src/KinectInput.o
+OBJS =		src/main.o src/KinectPongGame.o src/KinectInput.o src/states/intro.o src/states/kinectview.o
 
-LIBS = -lopencv_core -lopencv_highgui -lopencv_imgproc -lfreenect -lSDL2 -lSDL2_image
+LIBS = -lopencv_core -lopencv_highgui -lopencv_imgproc -lfreenect -lSDL2 -lSDL2_image -lSDL2_ttf
 
 TARGET =	KinectPong
 
@@ -25,6 +25,10 @@ RoboRef: $(ROBOREF_OBJS)
 PLAYERIM_OBJS = src/PlayerImageProcessor.o src/KinectInput.o src/player_image_test.o
 PlayerImageProcessor: $(PLAYERIM_OBJS)  
 	 $(CXX) -o player_image_test $(PLAYERIM_OBJS) -lopencv_core -lopencv_highgui -lopencv_imgproc -lfreenect -lopencv_objdetect
+
+KINECTTEST_OBJS = src/kinect_test.o src/KinectInput.o
+kinect_test: $(KINECTTEST_OBJS)  
+	 $(CXX) -o kinect_test $(KINECTTEST_OBJS) -lopencv_core -lopencv_highgui -lfreenect
 
 all:	$(TARGET)
 
