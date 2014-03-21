@@ -31,6 +31,8 @@ public:
 	int get_left_player_face_depth();
 	cv::Rect get_right_player_face_roi();
 	int get_right_player_face_depth();
+	bool got_left_face();
+	bool got_right_face();
 
 	void get_left_player_mask(cv::Mat& retmask);
 	void get_right_player_mask(cv::Mat& retmask);

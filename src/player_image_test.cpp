@@ -59,29 +59,23 @@ int main(int argc, char** argv)
 		cv::Mat visimg;
 		cv::merge(channels, visimg);
 
-		if(!facesfl)
-			facesfl = processor.init_player_faces(rgb_frame, depth_frame);
-		else{
-			processor.find_player_faces(rgb_frame, depth_frame);
-		}
+		processor.find_player_faces(rgb_frame, depth_frame);
 
-
-		if(facesfl){
+		if(processor.got_left_face()){
 			cv::Rect left_roi = processor.get_left_player_face_roi();
 			cv::Rect left_face_window(0, 0, left_roi.width, left_roi.height);
-			cv::Rect right_roi = processor.get_left_player_face_roi();
-			cv::Rect right_face_window(visimg.cols - right_roi.width, 0, right_roi.width, right_roi.height);
-
 			cv::Mat left_player_face(rgb_frame, left_roi);
-			cv::Mat right_player_face(rgb_frame, right_roi);
-
 			cv::Mat left_face_region(visimg, left_face_window);
 			left_player_face.copyTo(left_face_region);
+			cv::rectangle(visimg, left_roi, cv::Scalar(0, 255, 0), 5);
+		}
 
+		if(processor.got_right_face()){
+			cv::Rect right_roi = processor.get_right_player_face_roi();
+			cv::Rect right_face_window(visimg.cols - right_roi.width, 0, right_roi.width, right_roi.height);
+			cv::Mat right_player_face(rgb_frame, right_roi);
 			cv::Mat right_face_region(visimg, right_face_window);
 			right_player_face.copyTo(right_face_region);
-
-			cv::rectangle(visimg, left_roi, cv::Scalar(0, 255, 0), 5);
 			cv::rectangle(visimg, right_roi, cv::Scalar(0, 255, 0), 5);
 		}
 
