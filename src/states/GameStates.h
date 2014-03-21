@@ -65,6 +65,24 @@ private:
 	SDL_Texture* m_depth_tex;
 };
 
+//--------------------------------------------------
 
+class PlayingState : public GameState {
+public:
+	PlayingState(KinectPongGame*);
+	~PlayingState();
+	void handle_events(KinectInput*);
+	void handle_logic(); // No logic required
+	void render();
+
+private:
+	float m_ball_pos_x;
+	float m_ball_pos_y;
+	float m_ball_vel_x;
+	float m_ball_vel_y;
+	float m_ball_radius;
+	SDL_Texture* m_ball_tex;
+	Uint32 m_last_tick;
+};
 
 #endif /* GAMESTATES_H_ */

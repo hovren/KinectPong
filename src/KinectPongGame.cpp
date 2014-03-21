@@ -31,9 +31,20 @@ KinectPongGame::~KinectPongGame() {
 }
 
 void KinectPongGame::run(void) {
-	m_state_id = STATE_INTRO;
+
 	m_next_state = STATE_NULL;
-	m_current_state = new IntroState(this);
+
+	//m_state_id = STATE_INTRO;
+	m_state_id = STATE_PLAYING;
+
+	switch (m_state_id) {
+	case STATE_INTRO:
+		m_current_state = new IntroState(this);
+		break;
+	case STATE_PLAYING:
+		m_current_state = new PlayingState(this);
+		break;
+	}
 
 	std::cout << "Entering game loop" << std::endl;
 	while (m_state_id != STATE_EXIT) {
@@ -83,6 +94,8 @@ bool KinectPongGame::init() {
 		return false;
 	}
 
+	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
+
 	if (TTF_Init() != 0) {
 		std::cout << "TTF_Init Error: " << SDL_GetError() << std::endl;
 		return false;
@@ -96,7 +109,7 @@ bool KinectPongGame::init() {
 	}
 
 	SDL_GetWindowSize(m_window, &m_screen_width, &m_screen_height);
-	std::cout << "Created Window of size " << m_screen_width << " x " << m_screen_width << std::endl;
+	std::cout << "Created Window of size " << m_screen_width << " x " << m_screen_height << std::endl;
 
 	m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 	if (m_renderer == NULL) {
@@ -123,11 +136,11 @@ int KinectPongGame::norm2pixel_y(float y) {
 }
 
 float KinectPongGame::pixel2norm_x(int pixel_x) {
-	return 1.0 * pixel_x / m_screen_width;
+	return (1.0 * pixel_x) / m_screen_width;
 }
 
 float KinectPongGame::pixel2norm_y(int pixel_y) {
-	return 1.0 * pixel_y / m_screen_height;
+	return (1.0 * pixel_y) / m_screen_height;
 }
 
 void KinectPongGame::change_state() {
@@ -144,6 +157,9 @@ void KinectPongGame::change_state() {
 			break;
 		case STATE_KINECTVIEW:
 			m_current_state = new KinectViewState(this);
+			break;
+		case STATE_PLAYING:
+			m_current_state = new PlayingState(this);
 			break;
 		}
 

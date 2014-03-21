@@ -26,11 +26,11 @@ public:
 	SDL_Renderer* renderer() { return m_renderer; }
 	KinectInput* get_kinect() { return &m_kinect; }
 	SDL_Texture* texture_from_mat(cv::Mat&);
+	SDL_Palette* get_gray_palette() { return m_gray_palette; }
 	int norm2pixel_x(float x);
 	int norm2pixel_y(float y);
 	float pixel2norm_x(int pixel_x);
 	float pixel2norm_y(int pixel_y);
-
 private:
 	KinectInput m_kinect;
 
