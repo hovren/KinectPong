@@ -19,42 +19,80 @@ int main(int argc, char** argv)
 	processor.set_far_limit(2000);
 
 	input.start();
-	cv::Mat rgb_frame, bgr_frame, depth_frame, raw_depth_frame;
+	cv::Mat rgb_frame, bgr_frame, depth_frame;
 	std::string win_name_rgb = "RGB";
 	std::string win_name_depth = "Depth";
 	std::string win_name_face = "face";
 
 	cv::namedWindow(win_name_rgb, CV_WINDOW_KEEPRATIO);
 	cv::namedWindow(win_name_depth, CV_WINDOW_KEEPRATIO);
-	cv::namedWindow(win_name_face, CV_WINDOW_KEEPRATIO);
+
+	bool facesfl = false;
 
 	char key = 0;
 	while(key != 27){
 		bool datafl = false;
 		while(!datafl){
-				datafl = input.poll_data(rgb_frame, raw_depth_frame);
+				datafl = input.poll_data(rgb_frame, depth_frame);
 		}
-		double min, max;
 
-		processor.set_player_masks(raw_depth_frame);
+		cv::flip(rgb_frame, rgb_frame, 1);
+		cv::flip(depth_frame, depth_frame, 1);
+
+		if(!facesfl)
+			facesfl = false;
+			//facesfl = processor.init_player_faces(rgb_frame, depth_frame);
+		else{
+			processor.find_player_faces(rgb_frame, depth_frame);
+		}
+
+		processor.set_player_masks(depth_frame);
 		cv::Mat left_player_mask;
-		processor.get_left_player_mask(left_player_mask);
+		cv::Mat right_player_mask;
+		cv::Mat left_contact_mask;
+		cv::Mat right_contact_mask;
 
-		cv::Mat vismask;
-		cv::convertScaleAbs(left_player_mask, vismask, 255/max);
-		cv::minMaxIdx(left_player_mask, &min, &max);
+		processor.get_left_player_mask(left_player_mask);
+		processor.get_right_player_mask(right_player_mask);
+		processor.get_left_player_contact_mask(left_contact_mask);
+		processor.get_right_player_contact_mask(right_contact_mask);
+
+		cv::Mat dummy = cv::Mat::zeros(left_player_mask.rows, left_player_mask.cols, left_player_mask.type());
+		std::vector<cv::Mat> channels;
+		channels.push_back(left_player_mask);
+		channels.push_back(left_contact_mask + right_contact_mask);
+		channels.push_back(right_player_mask);
+
+		cv::Mat visimg;
+		cv::merge(channels, visimg);
+
+
+
+		if(facesfl){
+			cv::Rect left_roi = processor.get_left_player_face_roi();
+			cv::Rect left_face_window(0, 0, left_roi.width, left_roi.height);
+			cv::Rect right_roi = processor.get_left_player_face_roi();
+			cv::Rect right_face_window(visimg.cols - right_roi.width, 0, right_roi.width, right_roi.height);
+
+			cv::Mat left_player_face(rgb_frame, left_roi);
+			cv::Mat right_player_face(rgb_frame, right_roi);
+
+			cv::Mat left_face_region(visimg, left_face_window);
+			left_player_face.copyTo(left_face_region);
+
+			cv::Mat right_face_region(visimg, right_face_window);
+			right_player_face.copyTo(right_face_region);
+
+			cv::rectangle(visimg, left_roi, cv::Scalar(0, 255, 0), 5);
+			cv::rectangle(visimg, right_roi, cv::Scalar(0, 255, 0), 5);
+		}
+
 		cv::cvtColor(rgb_frame, bgr_frame, CV_RGB2BGR);
 
-		cv::Mat face_image_rgb, face_image_bgr;
-		cv::Rect face_box(50, 50, 200, 200);
-		bool facefl = processor.find_player_face(rgb_frame, face_image_rgb, face_box);
-		if(facefl){
-			cv::cvtColor(face_image_rgb, face_image_bgr, CV_RGB2BGR);
-			cv::imshow(win_name_face, face_image_bgr);
-		}
-		cv::rectangle(bgr_frame, face_box, cv::Scalar(0.0, 1.0, 0.0), 5);
+
+
 		cv::imshow(win_name_rgb, bgr_frame);
-		cv::imshow(win_name_depth, left_player_mask);
+		cv::imshow(win_name_depth, visimg);
 		key = cv::waitKey(1);
 	}
 	std::cout << "Stopping input device..." << std::endl;
