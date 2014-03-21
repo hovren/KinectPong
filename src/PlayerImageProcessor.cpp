@@ -224,7 +224,7 @@ void PlayerImageProcessor::set_player_masks(cv::Mat depth_frame)
 	cv::Mat contour_image;
 	player_mask.convertTo(contour_image, CV_8UC1, 255);
 	int iterations = 1;
-	cv::Mat strel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(3, 3), cv::Point(1, 1));
+	cv::Mat strel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(11, 11), cv::Point(5, 5));
 	//clean up the image
 	/*cv::erode(contour_image, contour_image, strel, cv::Point(-1, -1), iterations);
 	cv::dilate(contour_image, contour_image, strel, cv::Point(-1, -1), 2*iterations);
@@ -259,7 +259,7 @@ void PlayerImageProcessor::set_player_masks(cv::Mat depth_frame)
 		int left_area = calc_area(m_left_player_mask);
 		int left_contact_area = 0;
 		int old_left_contact_area = 1;
-		while((left_contact_area < left_area/5) && (old_left_contact_area != left_contact_area)){
+		while((left_contact_area < left_area/10) && (old_left_contact_area != left_contact_area)){
 			old_left_contact_area = left_contact_area;
 			cv::Mat new_mask;
 			cv::dilate(m_left_player_contact_mask, new_mask, strel, cv::Point(-1, -1), 5);
@@ -278,7 +278,7 @@ void PlayerImageProcessor::set_player_masks(cv::Mat depth_frame)
 		int right_area = calc_area(m_right_player_mask);
 		int right_contact_area = 0;
 		int old_right_contact_area = 1;
-		while((right_contact_area < right_area/5) && (old_right_contact_area != right_contact_area)){
+		while((right_contact_area < right_area/10) && (old_right_contact_area != right_contact_area)){
 			old_right_contact_area = right_contact_area;
 			cv::Mat new_mask;
 			cv::dilate(m_right_player_contact_mask, new_mask, strel, cv::Point(-1, -1), 5);
