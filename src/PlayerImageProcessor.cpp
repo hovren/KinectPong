@@ -273,6 +273,9 @@ void PlayerImageProcessor::set_player_masks(cv::Mat depth_frame)
 	double left_min_val, left_max_val;
 	cv::Point left_min, left_max;
 	cv::minMaxLoc(float_depth, &left_min_val, &left_max_val, &left_min, &left_max, m_left_player_mask);
+	cv::Mat left_contact_threshold_float, left_contact_threshold;
+	cv::threshold(float_depth, left_contact_threshold_float, left_min_val+200, 255, CV_THRESH_BINARY_INV);
+	left_contact_threshold_float.convertTo(left_contact_threshold, CV_8UC1, 1);
 	m_left_player_contact_mask.setTo(0);
 	if((left_min.x > 0) && (left_min.y > 0)){
 		m_left_player_contact_mask.at<uchar>(left_min.y, left_min.x) = 255;
@@ -283,7 +286,7 @@ void PlayerImageProcessor::set_player_masks(cv::Mat depth_frame)
 			old_left_contact_area = left_contact_area;
 			cv::Mat new_mask;
 			cv::dilate(m_left_player_contact_mask, new_mask, strel, cv::Point(-1, -1), 5);
-			new_mask.copyTo(m_left_player_contact_mask, m_left_player_mask);
+			new_mask.copyTo(m_left_player_contact_mask, left_contact_threshold.mul(m_left_player_mask));
 			left_contact_area = calc_area(m_left_player_contact_mask);
 		}
 	}
@@ -291,6 +294,9 @@ void PlayerImageProcessor::set_player_masks(cv::Mat depth_frame)
 	double right_min_val, right_max_val;
 	cv::Point right_min, right_max;
 	cv::minMaxLoc(float_depth, &right_min_val, &right_max_val, &right_min, &right_max, m_right_player_mask);
+	cv::Mat right_contact_threshold_float, right_contact_threshold;
+	cv::threshold(float_depth, right_contact_threshold_float, right_min_val+200, 255, CV_THRESH_BINARY_INV);
+	right_contact_threshold_float.convertTo(right_contact_threshold, CV_8UC1, 1);
 	m_right_player_contact_mask.setTo(0);
 	if((right_min.x > 0) && (right_min.y > 0)){
 		m_right_player_contact_mask.at<uchar>(right_min.y, right_min.x) = 255;
@@ -301,7 +307,7 @@ void PlayerImageProcessor::set_player_masks(cv::Mat depth_frame)
 			old_right_contact_area = right_contact_area;
 			cv::Mat new_mask;
 			cv::dilate(m_right_player_contact_mask, new_mask, strel, cv::Point(-1, -1), 5);
-			new_mask.copyTo(m_right_player_contact_mask, m_right_player_mask);
+			new_mask.copyTo(m_right_player_contact_mask, right_contact_threshold.mul(m_right_player_mask));
 			right_contact_area = calc_area(m_right_player_contact_mask);
 		}
 	}
