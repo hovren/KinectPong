@@ -26,6 +26,10 @@ public:
 	SDL_Renderer* renderer() { return m_renderer; }
 	KinectInput* get_kinect() { return &m_kinect; }
 	SDL_Texture* texture_from_mat(cv::Mat&);
+	int norm2pixel_x(float x);
+	int norm2pixel_y(float y);
+	float pixel2norm_x(int pixel_x);
+	float pixel2norm_y(int pixel_y);
 
 private:
 	KinectInput m_kinect;
@@ -37,6 +41,8 @@ private:
 	void change_state();
 
 	// Rendering
+	int m_screen_height;
+	int m_screen_width;
 	SDL_Window* m_window;
 	SDL_Renderer* m_renderer;
 	SDL_Texture* m_rgb_tex;

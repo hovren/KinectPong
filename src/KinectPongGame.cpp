@@ -88,17 +88,22 @@ bool KinectPongGame::init() {
 		return false;
 	}
 
-	m_window = SDL_CreateWindow("Hello World!", 100, 100, 1280, 960, SDL_WINDOW_SHOWN);
+	//m_window = SDL_CreateWindow("Hello World!", 100, 100, 1280, 960, SDL_WINDOW_SHOWN);
+	m_window = SDL_CreateWindow("Kinect Pong", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1280, 960, SDL_WINDOW_FULLSCREEN_DESKTOP);
 	if (m_window == NULL) {
 		std::cout << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
 		return false;
 	}
+
+	SDL_GetWindowSize(m_window, &m_screen_width, &m_screen_height);
+	std::cout << "Created Window of size " << m_screen_width << " x " << m_screen_width << std::endl;
 
 	m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 	if (m_renderer == NULL) {
 		std::cout << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
 		return false;
 	}
+
 	return true;
 }
 
@@ -107,6 +112,22 @@ void KinectPongGame::set_next_state(int new_state) {
 	if (m_next_state != STATE_EXIT) {
 		m_next_state = new_state;
 	}
+}
+
+int KinectPongGame::norm2pixel_x(float x) {
+	return (int) (x * m_screen_width);
+}
+
+int KinectPongGame::norm2pixel_y(float y) {
+	return (int) (y * m_screen_height);
+}
+
+float KinectPongGame::pixel2norm_x(int pixel_x) {
+	return 1.0 * pixel_x / m_screen_width;
+}
+
+float KinectPongGame::pixel2norm_y(int pixel_y) {
+	return 1.0 * pixel_y / m_screen_height;
 }
 
 void KinectPongGame::change_state() {

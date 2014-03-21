@@ -70,19 +70,11 @@ void IntroState::render() {
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 	SDL_RenderClear(renderer);
 	//SDL_RenderCopy(renderer, tex, NULL, NULL);
-	if (m_game->get_kinect()->is_running()) {
-		SDL_Rect top_left;
-		top_left.x = 1280 / 2 - 100/2;
-		top_left.y = 960 / 2 - 100/2;
-		top_left.w = 100;
-		top_left.h = 100;
-		SDL_RenderCopy(renderer, tex, NULL, &top_left);
-	}
-	else {
+	if (!m_game->get_kinect()->is_running()) {
 		SDL_Texture* text_tex = SDL_CreateTextureFromSurface(renderer, m_text);
 		SDL_Rect dst;
-		dst.x = 1280 / 2 - m_text->w / 2;
-		dst.y = 960 / 2 - m_text->h / 2;
+		dst.x = m_game->norm2pixel_x(0.5) - m_text->w / 2;
+		dst.y = m_game->norm2pixel_y(0.5) - m_text->h / 2;
 		dst.w = m_text->w;
 		dst.h = m_text->h;
 		SDL_RenderCopy(renderer, text_tex, NULL, &dst);

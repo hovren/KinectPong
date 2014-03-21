@@ -53,7 +53,12 @@ void KinectViewState::handle_logic() {
 void KinectViewState::render() {
 	SDL_Renderer* renderer = m_game->renderer();
 	if (m_rgb_tex && m_depth_tex) {
-		SDL_Rect depth_dst = {1280 - 400, 960-300, 400, 300};
+		SDL_Rect depth_dst;
+		float aspect = 0.75;
+		depth_dst.x = m_game->norm2pixel_x(0.8);
+		depth_dst.w = m_game->norm2pixel_x(0.2);
+		depth_dst.h = depth_dst.w * aspect;
+		depth_dst.y = m_game->norm2pixel_y(1.0 - m_game->pixel2norm_y(depth_dst.h));
 		SDL_RenderClear(renderer);
 		SDL_RenderCopy(renderer, m_rgb_tex, NULL, NULL);
 		SDL_RenderCopy(renderer, m_depth_tex, NULL, &depth_dst);
