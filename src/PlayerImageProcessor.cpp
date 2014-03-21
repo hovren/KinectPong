@@ -52,10 +52,11 @@ bool PlayerImageProcessor::init_player_faces(cv::Mat rgb_frame, cv::Mat depth_fr
 	depth_frame.convertTo(float_depth, CV_32FC1);
 
 	cv::Mat threshold_image;
-	threshold_depth_frame(float_depth, threshold_image);
+	cv::add(m_left_player_mask, m_right_player_mask, threshold_image, cv::noArray(), CV_8U);
 
 	cv::Mat weight_image;
 	threshold_image.convertTo(weight_image, CV_8UC1);
+	weight_image /= 255;
 	frame_gray = frame_gray.mul(weight_image);
 
 	std::vector<cv::Rect> detections;
@@ -110,10 +111,11 @@ void PlayerImageProcessor::find_player_faces(cv::Mat rgb_frame, cv::Mat depth_fr
 	depth_frame.convertTo(float_depth, CV_32FC1);
 
 	cv::Mat threshold_image;
-	threshold_depth_frame(float_depth, threshold_image);
+	cv::add(m_left_player_mask, m_right_player_mask, threshold_image, cv::noArray(), CV_8UC1);
 
 	cv::Mat weight_image;
 	threshold_image.convertTo(weight_image, CV_8UC1);
+	weight_image /= 255;
 	frame_gray = frame_gray.mul(weight_image);
 
 

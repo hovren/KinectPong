@@ -39,13 +39,6 @@ int main(int argc, char** argv)
 		cv::flip(rgb_frame, rgb_frame, 1);
 		cv::flip(depth_frame, depth_frame, 1);
 
-		if(!facesfl)
-			facesfl = false;
-			//facesfl = processor.init_player_faces(rgb_frame, depth_frame);
-		else{
-			processor.find_player_faces(rgb_frame, depth_frame);
-		}
-
 		processor.set_player_masks(depth_frame);
 		cv::Mat left_player_mask;
 		cv::Mat right_player_mask;
@@ -66,6 +59,11 @@ int main(int argc, char** argv)
 		cv::Mat visimg;
 		cv::merge(channels, visimg);
 
+		if(!facesfl)
+			facesfl = processor.init_player_faces(rgb_frame, depth_frame);
+		else{
+			processor.find_player_faces(rgb_frame, depth_frame);
+		}
 
 
 		if(facesfl){
