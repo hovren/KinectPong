@@ -9,7 +9,10 @@
 
 int main(int argc, char** argv) {
 	KinectPongGame game;
-	game.init();
+	//std::cout << "" << argc << " " << argv[1] << std::endl;
+	bool fullscreen = (argc > 1) && (strcmp(argv[1], "fullscreen") == 0);
+	std::cout << "Starting in " << (fullscreen ? "fullscreen" : "normal") << " window mode" << std::endl;
+	game.init(fullscreen);
 	game.run();
 
 	SDL_Quit();
