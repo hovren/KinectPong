@@ -193,7 +193,7 @@ bool Player::collision_line(cv::Point2f ball_pos, cv::Point2f ball_velocity,
 				float gradient_norm = cv::norm(gradient);
 				//std::cout << "value " << gradient << " norm " << gradient_norm << " mask val " << (unsigned int) m_paddle_mask.at<unsigned char>(cpos.x, cpos.y) << std::endl;
 				collision_normal.val[0] = gradient.val[0] / gradient_norm;
-				collision_normal.val[1] = gradient.val[1] / gradient_norm;
+				collision_normal.val[1] = -1.0 * gradient.val[1] / gradient_norm; // NOTE: OpenCV has other coordinate system?
 				collided = true;
 			}
 		}
