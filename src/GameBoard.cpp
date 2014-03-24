@@ -86,7 +86,6 @@ void GameBoard::update(float dt) {
 
 	// Collide with players
 	cv::Vec2f collision_normal;
-	cv::Point2f old_pos = m_ball_pos;
 	cv::Point2f normed_velocity = m_ball_velocity * (1.0 / cv::norm(m_ball_velocity));
 	if (normed_velocity.dot(collision_normal) < 0) {
 		normed_velocity *= -1;
@@ -97,9 +96,9 @@ void GameBoard::update(float dt) {
 		if (m_players[i]->collision_line(m_ball_pos, m_ball_velocity, m_ball_radius, dt, collision_normal, collision_point)) {
 			m_ball_pos = collision_point;
 			cv::Point2f reflection = reflect(normed_velocity, collision_normal);
-			std::cout << "Collided. Input velocity (normed)" << normed_velocity << " speed="<< cv::norm(m_ball_velocity) << " dot=" << reflection.dot(normed_velocity) << " collision normal " << collision_normal <<  " reflection " << reflection << std::endl;
+			//std::cout << "Collided. Input velocity (normed)" << normed_velocity << " speed="<< cv::norm(m_ball_velocity) << " dot=" << reflection.dot(normed_velocity) << " collision normal " << collision_normal <<  " reflection " << reflection << std::endl;
 			m_ball_velocity = cv::norm(m_ball_velocity) * reflection;
-			std::cout << "New velocity " << m_ball_velocity << std::endl;
+			//std::cout << "New velocity " << m_ball_velocity << std::endl;
 			had_collision = true;
 		}
 #if 0
