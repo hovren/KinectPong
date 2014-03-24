@@ -1,6 +1,6 @@
 CXXFLAGS =	-O2 -g -Wall -fmessage-length=0 -I/usr/include/libfreenect -I/usr/include/SDL2 -L/usr/local/lib
 
-OBJS =		src/main.o src/KinectPongGame.o src/KinectInput.o src/states/intro.o src/states/kinectview.o src/states/playing.o
+OBJS =		src/main.o src/KinectPongGame.o src/KinectInput.o src/GameBoard.o src/Player.o src/states/intro.o src/states/kinectview.o src/states/playing.o
 
 LIBS = -lopencv_core -lopencv_highgui -lopencv_imgproc -lfreenect -lSDL2 -lSDL2_image -lSDL2_ttf
 
