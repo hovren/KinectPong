@@ -28,8 +28,10 @@ public:
 	double get_far_limit();
 
 	cv::Rect get_left_player_face_roi();
+	void get_left_player_face_image(cv::Mat& face_image);
 	int get_left_player_face_depth();
 	cv::Rect get_right_player_face_roi();
+	void get_right_player_face_image(cv::Mat& face_image);
 	int get_right_player_face_depth();
 	bool got_left_face();
 	bool got_right_face();
@@ -50,6 +52,8 @@ private:
 	cv::CascadeClassifier m_face_detector;
 	cv::Rect m_left_player_face_position;
 	cv::Rect m_right_player_face_position;
+	cv::Mat m_left_player_face_image;
+	cv::Mat m_right_player_face_image;
 	int m_left_player_face_depth;
 	int m_right_player_face_depth;
 	bool m_tracking_left;

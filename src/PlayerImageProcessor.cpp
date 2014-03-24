@@ -35,6 +35,10 @@ PlayerImageProcessor::PlayerImageProcessor() {
 	empty_frame.copyTo(m_left_player_contact_mask);
 	empty_frame.copyTo(m_right_player_contact_mask);
 
+	cv::Mat empty_face = cv::Mat::zeros(cv::Size(50, 50), CV_8UC3);
+	empty_face.copyTo(m_left_player_face_image);
+	empty_face.copyTo(m_right_player_face_image);
+
 }
 
 PlayerImageProcessor::~PlayerImageProcessor() {
@@ -84,6 +88,7 @@ bool PlayerImageProcessor::init_player_faces(cv::Mat rgb_frame, cv::Mat depth_fr
 		int col = (int)round(m_left_player_face_position.x+m_left_player_face_position.width/2);
 		m_left_player_face_depth = depth_frame.at<int>(row, col);
 		m_tracking_left = true;
+		//std::cout << "Got left face" << std::endl;
 	}
 	else{
 		m_tracking_left = false;
@@ -96,6 +101,7 @@ bool PlayerImageProcessor::init_player_faces(cv::Mat rgb_frame, cv::Mat depth_fr
 		int col = (int)round(m_right_player_face_position.x+m_right_player_face_position.width/2);
 		m_right_player_face_depth = depth_frame.at<int>(row, col);
 		m_tracking_right = true;
+		//std::cout << "Got right face" << std::endl;
 	}
 	else{
 		m_tracking_right = false;
@@ -136,6 +142,10 @@ void PlayerImageProcessor::find_player_faces(cv::Mat rgb_frame, cv::Mat depth_fr
 	if(m_tracking_right && !redetectfl)
 		find_right_player_face(frame_gray, depth_frame);
 
+	cv::Mat left_face_image(rgb_frame, m_left_player_face_position);
+	left_face_image.copyTo(m_left_player_face_image);
+	cv::Mat right_face_image(rgb_frame, m_right_player_face_position);
+	right_face_image.copyTo(m_right_player_face_image);
 }
 
 void PlayerImageProcessor::find_left_player_face(cv::Mat frame_gray, cv::Mat depth_frame)
@@ -188,7 +198,7 @@ void PlayerImageProcessor::find_right_player_face(cv::Mat frame_gray, cv::Mat de
 		int row = (int)round(m_right_player_face_position.y+m_right_player_face_position.height/2);
 		int col = (int)round(m_right_player_face_position.x+m_right_player_face_position.width/2);
 		m_right_player_face_depth = depth_frame.at<int>(row, col);
-		m_tracking_left = true;
+		m_tracking_right = true;
 	}
 	else{
 		m_tracking_right = false;
@@ -249,7 +259,6 @@ void PlayerImageProcessor::set_player_masks(cv::Mat depth_frame)
 	std::vector<cv::Vec4i> hierarchy;
 	cv::Mat contour_image;
 	player_mask.convertTo(contour_image, CV_8UC1, 255);
-	int iterations = 1;
 	//label regions
 	cv::Mat label_image;
 	contour_image.copyTo(label_image);
@@ -383,4 +392,14 @@ bool PlayerImageProcessor::got_left_face()
 bool PlayerImageProcessor::got_right_face()
 {
 	return m_tracking_right;
+}
+
+void PlayerImageProcessor::get_left_player_face_image(cv::Mat& face_image)
+{
+	m_left_player_face_image.copyTo(face_image);
+}
+
+void PlayerImageProcessor::get_right_player_face_image(cv::Mat& face_image)
+{
+	m_right_player_face_image.copyTo(face_image);
 }

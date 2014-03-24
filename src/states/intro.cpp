@@ -48,7 +48,7 @@ void IntroState::handle_events(KinectInput* kinect) {
 			m_game->set_next_state(STATE_EXIT);
 			break;
 		case SDL_KEYDOWN:
-			//m_game->set_next_state(STATE_KINECTVIEW);
+			m_game->set_next_state(STATE_KINECTVIEW);
 			break;
 		}
 	} // end SDL_PollEvent
@@ -60,8 +60,8 @@ void IntroState::handle_logic() {
 		m_game->get_kinect()->start(); // This takes a while
 	}
 	else if (m_game->get_kinect()->is_running()) {
-		//m_game->set_next_state(STATE_KINECTVIEW);
-		m_game->set_next_state(STATE_PLAYING);
+		m_game->set_next_state(STATE_KINECTVIEW);
+		//m_game->set_next_state(STATE_WAITFORPLAYERS);
 	}
 }
 

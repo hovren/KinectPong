@@ -40,7 +40,7 @@ void KinectViewState::handle_events(KinectInput* kinect) {
 		switch (e.type) {
 		case SDL_QUIT:
 		case SDL_KEYDOWN:
-			m_game->set_next_state(STATE_EXIT);
+			m_game->set_next_state(STATE_WAITFORPLAYERS);
 			break;
 		}
 	} // end SDL_PollEvent

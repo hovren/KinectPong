@@ -31,6 +31,8 @@ RoboRef::~RoboRef() {
 void RoboRef::connect(std::string portname)
 {
 	m_pan_tilt_interface.connect(portname);
+	m_pan_tilt_interface.set_base_speed_ticks(57, 57);
+	m_pan_tilt_interface.set_speed_ticks(3000, 3000);
 }
 
 void RoboRef::set_intrinsics(cv::Mat intrinsic_camera_matrix)

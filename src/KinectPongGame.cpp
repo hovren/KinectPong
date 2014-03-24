@@ -36,8 +36,8 @@ void KinectPongGame::run(void) {
 
 	m_next_state = STATE_NULL;
 
-	//m_state_id = STATE_INTRO;
-	m_state_id = STATE_PLAYING;
+	m_state_id = STATE_INTRO;
+	//m_state_id = STATE_PLAYING;
 
 	switch (m_state_id) {
 	case STATE_INTRO:
@@ -91,6 +91,14 @@ bool KinectPongGame::init(bool fullscreen) {
 		std::cout << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
 		return false;
 	}
+
+	//Initialise feace detector
+	m_image_processor.init_detector("/usr/share/OpenCV/haarcascades");
+
+	//Initialise RoboRef if present
+	#ifdef BUILD_ROBOREF
+	m_roboref.connect("/dev/ttyUSB0");
+	#endif
 
 	return true;
 }
