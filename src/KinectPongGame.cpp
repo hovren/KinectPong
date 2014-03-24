@@ -24,6 +24,8 @@ KinectPongGame::KinectPongGame() : m_kinect(true){
 		m_gray_palette->colors[i].g = i;
 		m_gray_palette->colors[i].b = i;
 	}
+
+	m_gameboard = new GameBoard();
 }
 
 KinectPongGame::~KinectPongGame() {
@@ -31,9 +33,20 @@ KinectPongGame::~KinectPongGame() {
 }
 
 void KinectPongGame::run(void) {
-	m_state_id = STATE_INTRO;
+
 	m_next_state = STATE_NULL;
-	m_current_state = new IntroState(this);
+
+	//m_state_id = STATE_INTRO;
+	m_state_id = STATE_PLAYING;
+
+	switch (m_state_id) {
+	case STATE_INTRO:
+		m_current_state = new IntroState(this);
+		break;
+	case STATE_PLAYING:
+		m_current_state = new PlayingState(this);
+		break;
+	}
 
 	std::cout << "Entering game loop" << std::endl;
 	while (m_state_id != STATE_EXIT) {
@@ -45,43 +58,16 @@ void KinectPongGame::run(void) {
 	std::cout << "Game loop ended" << std::endl;
 
 	m_kinect.stop();
-//	bool quit = false;
-//	SDL_Event e;
-//	std::cout << "Entering game loop" << std::endl;
-//	SDL_Texture* background = NULL;
-//
-//	while (!quit) {
-//		while (SDL_PollEvent(&e)) {
-//			switch (e.type) {
-//			case SDL_QUIT:
-//			case SDL_KEYDOWN:
-//				quit = true;
-//				std::cout << "Quitting" << std::endl;
-//				break;
-//			}
-//		} // end SDL_PollEvent
-//
-//		cv::Mat depth, rgb;
-//		if (m_kinect.poll_data(rgb, depth)) {
-//			//std::cout << "New frame at time " << SDL_GetTicks() / 1000.0 << std::endl;
-//			background = texture_from_mat(rgb);
-//		}
-//
-//		if (background) {
-//			SDL_RenderClear(m_renderer);
-//			SDL_RenderCopy(m_renderer, background, NULL, NULL);
-//			SDL_RenderPresent(m_renderer);
-//		}
-//	}
-//	m_kinect.stop();
 }
 
 
-bool KinectPongGame::init() {
+bool KinectPongGame::init(bool fullscreen) {
 	if(SDL_Init(SDL_INIT_EVERYTHING) != 0) {
 		std::cout << "SDL_Init Error: " << SDL_GetError() << std::endl;
 		return false;
 	}
+
+	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
 
 	if (TTF_Init() != 0) {
 		std::cout << "TTF_Init Error: " << SDL_GetError() << std::endl;
@@ -89,14 +75,16 @@ bool KinectPongGame::init() {
 	}
 
 	//m_window = SDL_CreateWindow("Hello World!", 100, 100, 1280, 960, SDL_WINDOW_SHOWN);
-	m_window = SDL_CreateWindow("Kinect Pong", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1280, 960, SDL_WINDOW_FULLSCREEN_DESKTOP);
+	int flags = (fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
+	m_window = SDL_CreateWindow("Kinect Pong", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1280, 960, flags);
 	if (m_window == NULL) {
 		std::cout << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
 		return false;
 	}
 
 	SDL_GetWindowSize(m_window, &m_screen_width, &m_screen_height);
-	std::cout << "Created Window of size " << m_screen_width << " x " << m_screen_width << std::endl;
+	std::cout << "Created Window of size " << m_screen_width << " x " << m_screen_height << std::endl;
+	std::cout << "Aspect ratio is " << get_aspect_ratio() << std::endl;
 
 	m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 	if (m_renderer == NULL) {
@@ -123,11 +111,16 @@ int KinectPongGame::norm2pixel_y(float y) {
 }
 
 float KinectPongGame::pixel2norm_x(int pixel_x) {
-	return 1.0 * pixel_x / m_screen_width;
+	return (1.0 * pixel_x) / m_screen_width;
 }
 
 float KinectPongGame::pixel2norm_y(int pixel_y) {
-	return 1.0 * pixel_y / m_screen_height;
+	return (1.0 * pixel_y) / m_screen_height;
+}
+
+void KinectPongGame::window_size(int& width, int& height) {
+	width = m_screen_width;
+	height = m_screen_height;
 }
 
 void KinectPongGame::change_state() {
@@ -144,6 +137,9 @@ void KinectPongGame::change_state() {
 			break;
 		case STATE_KINECTVIEW:
 			m_current_state = new KinectViewState(this);
+			break;
+		case STATE_PLAYING:
+			m_current_state = new PlayingState(this);
 			break;
 		}
 
@@ -182,4 +178,8 @@ SDL_Texture* KinectPongGame::texture_from_mat(cv::Mat& image) {
 	}
 	SDL_FreeSurface(surf);
 	return tex;
+}
+
+float KinectPongGame::get_aspect_ratio() {
+	return 1.0 * m_screen_width / m_screen_height;
 }

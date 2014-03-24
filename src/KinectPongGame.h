@@ -11,6 +11,7 @@
 #include <SDL2/SDL.h>
 #include <opencv2/core/core.hpp>
 #include "KinectInput.h"
+#include "GameBoard.h"
 //#include "states/GameStates.h"
 
 class GameState;
@@ -19,20 +20,27 @@ class KinectPongGame {
 public:
 	KinectPongGame();
 	virtual ~KinectPongGame();
-	bool init(void);
+	bool init(bool fullscreen = false);
 	void run(void);
 
 	void set_next_state(int new_state);
 	SDL_Renderer* renderer() { return m_renderer; }
 	KinectInput* get_kinect() { return &m_kinect; }
 	SDL_Texture* texture_from_mat(cv::Mat&);
+	SDL_Palette* get_gray_palette() { return m_gray_palette; }
+	float get_aspect_ratio();
 	int norm2pixel_x(float x);
 	int norm2pixel_y(float y);
 	float pixel2norm_x(int pixel_x);
 	float pixel2norm_y(int pixel_y);
 
+	void window_size(int& width, int& height);
+	GameBoard* get_gameboard() { return m_gameboard; };
+
+
 private:
 	KinectInput m_kinect;
+	GameBoard* m_gameboard;
 
 	// Game state handling (credit to lazyfoo.net)
 	GameState* m_current_state;
