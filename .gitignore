@@ -3,6 +3,8 @@
 *.lo
 *.o
 KinectPong
+kinect_test
+roboref_test
 
 # Compiled Dynamic libraries
 *.so
@@ -16,3 +18,4 @@ KinectPong
 # Eclipse files
 .cproject
 .project
+.settings
