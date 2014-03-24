@@ -12,6 +12,12 @@
 #include <opencv2/core/core.hpp>
 #include "KinectInput.h"
 #include "GameBoard.h"
+#include "PlayerImageProcessor.h"
+
+//build with or without RoboRef support
+#ifdef BUILD_ROBOREF
+#include "RoboRef.h"
+#endif
 //#include "states/GameStates.h"
 
 class GameState;
@@ -26,6 +32,10 @@ public:
 	void set_next_state(int new_state);
 	SDL_Renderer* renderer() { return m_renderer; }
 	KinectInput* get_kinect() { return &m_kinect; }
+	PlayerImageProcessor* get_image_processor() { return &m_image_processor;}
+	#ifdef BUILD_ROBOREF
+	RoboRef* get_roboref() { return &m_roboref;}
+	#endif
 	SDL_Texture* texture_from_mat(cv::Mat&);
 	SDL_Palette* get_gray_palette() { return m_gray_palette; }
 	float get_aspect_ratio();
@@ -35,12 +45,17 @@ public:
 	float pixel2norm_y(int pixel_y);
 
 	void window_size(int& width, int& height);
-	GameBoard* get_gameboard() { return m_gameboard; };
+	GameBoard* get_gameboard() { return m_gameboard; }
+
 
 
 private:
 	KinectInput m_kinect;
 	GameBoard* m_gameboard;
+	PlayerImageProcessor m_image_processor;
+	#ifdef BUILD_ROBOREF
+	RoboRef m_roboref;
+	#endif
 
 	// Game state handling (credit to lazyfoo.net)
 	GameState* m_current_state;
