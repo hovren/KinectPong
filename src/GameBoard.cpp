@@ -76,9 +76,9 @@ void GameBoard::update(float dt) {
 			r.y = m_ball_velocity.y - 2 * dn * collision_normal.val[1];
 			m_ball_velocity.x = r.x; //0.2 * collision_normal.val[0];
 			m_ball_velocity.y = r.y; //0.2 * collision_normal.val[1];
-			std::cout << "Input direction " << m_ball_velocity.x << ", " << m_ball_velocity.y << std::endl;
-			std::cout << "Surface normal " << collision_normal.val[0] << ", " << collision_normal.val[1] << std::endl;
-			std::cout << "New velocity " << m_ball_velocity.x << ", " << m_ball_velocity.y << std::endl;
+			//std::cout << "Input direction " << m_ball_velocity.x << ", " << m_ball_velocity.y << std::endl;
+			//std::cout << "Surface normal " << collision_normal.val[0] << ", " << collision_normal.val[1] << std::endl;
+			//std::cout << "New velocity " << m_ball_velocity.x << ", " << m_ball_velocity.y << std::endl;
 			had_collision = true;
 			break; // No need to check other player
 		}
