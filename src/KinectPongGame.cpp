@@ -135,6 +135,9 @@ void KinectPongGame::change_state() {
 		case STATE_INTRO:
 			m_current_state = new IntroState(this);
 			break;
+		case STATE_WAITFORPLAYERS:
+			m_current_state = new WaitForPlayerState(this);
+			break;
 		case STATE_KINECTVIEW:
 			m_current_state = new KinectViewState(this);
 			break;
