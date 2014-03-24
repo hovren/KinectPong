@@ -44,6 +44,7 @@ public:
 
 	void threshold_depth_frame(cv::Mat depth_frame, cv::Mat& threshold_frame);
 	int calc_area(cv::Mat mask);
+	void select_largest(cv::Mat& label_image, int n_regions);
 
 private:
 	cv::CascadeClassifier m_face_detector;
@@ -60,6 +61,8 @@ private:
 	double m_near_limit;
 	double m_far_limit;
 	unsigned int m_min_contour_size;
+	cv::Size m_min_face_size;
+	cv::Size m_max_face_size;
 
 };
 

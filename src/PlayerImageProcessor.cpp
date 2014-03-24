@@ -26,6 +26,9 @@ PlayerImageProcessor::PlayerImageProcessor() {
 	m_right_player_face_position.height = 0;
 	m_tracking_right = false;
 
+	m_min_face_size = cv::Size(20, 30);
+	m_max_face_size = cv::Size(60, 90);
+
 	cv::Mat empty_frame = cv::Mat::zeros(cv::Size(640, 480), CV_8UC1);
 	empty_frame.copyTo(m_left_player_mask);
 	empty_frame.copyTo(m_right_player_mask);
@@ -60,7 +63,7 @@ bool PlayerImageProcessor::init_player_faces(cv::Mat rgb_frame, cv::Mat depth_fr
 	frame_gray = frame_gray.mul(weight_image);
 
 	std::vector<cv::Rect> detections;
-	m_face_detector.detectMultiScale(frame_gray, detections, 2, 3, 0, cv::Size(30, 30), cv::Size(50, 50));
+	m_face_detector.detectMultiScale(frame_gray, detections, 2, 3, 0, m_min_face_size, m_max_face_size);
 
 	std::vector<cv::Rect> left_detections;
 	std::vector<cv::Rect> right_detections;
@@ -81,7 +84,6 @@ bool PlayerImageProcessor::init_player_faces(cv::Mat rgb_frame, cv::Mat depth_fr
 		int col = (int)round(m_left_player_face_position.x+m_left_player_face_position.width/2);
 		m_left_player_face_depth = depth_frame.at<int>(row, col);
 		m_tracking_left = true;
-		std::cout << "Got left face" << std::endl;
 	}
 	else{
 		m_tracking_left = false;
@@ -94,7 +96,6 @@ bool PlayerImageProcessor::init_player_faces(cv::Mat rgb_frame, cv::Mat depth_fr
 		int col = (int)round(m_right_player_face_position.x+m_right_player_face_position.width/2);
 		m_right_player_face_depth = depth_frame.at<int>(row, col);
 		m_tracking_right = true;
-		std::cout << "Got right face" << std::endl;
 	}
 	else{
 		m_tracking_right = false;
@@ -125,12 +126,14 @@ void PlayerImageProcessor::find_player_faces(cv::Mat rgb_frame, cv::Mat depth_fr
 	weight_image /= 255;
 	frame_gray = frame_gray.mul(weight_image);
 
-	if(!m_tracking_left || !m_tracking_right){
+	bool redetectfl = (!m_tracking_left || !m_tracking_right);
+
+	if(redetectfl){
 		init_player_faces(rgb_frame, depth_frame);
 	}
-	if(m_tracking_left)
+	if(m_tracking_left && !redetectfl)
 		find_left_player_face(frame_gray, depth_frame);
-	if(m_tracking_right)
+	if(m_tracking_right && !redetectfl)
 		find_right_player_face(frame_gray, depth_frame);
 
 }
@@ -147,7 +150,7 @@ void PlayerImageProcessor::find_left_player_face(cv::Mat frame_gray, cv::Mat dep
 
 	cv::Mat face_roi(frame_gray, roi);
 	std::vector<cv::Rect> detections;
-	m_face_detector.detectMultiScale(face_roi, detections, 2, 3, 0, cv::Size(30, 30), cv::Size(70, 70));
+	m_face_detector.detectMultiScale(face_roi, detections, 2, 3, 0, m_min_face_size, m_max_face_size);
 
 	if(detections.size() > 0){
 		m_left_player_face_position = detections.at(0);
@@ -176,7 +179,7 @@ void PlayerImageProcessor::find_right_player_face(cv::Mat frame_gray, cv::Mat de
 
 	cv::Mat face_roi(frame_gray, roi);
 	std::vector<cv::Rect> detections;
-	m_face_detector.detectMultiScale(face_roi, detections, 1.1, 3, 0, cv::Size(30, 30), cv::Size(70, 70));
+	m_face_detector.detectMultiScale(face_roi, detections, 1.1, 3, 0, m_min_face_size, m_max_face_size);
 
 	if(detections.size() > 0){
 		m_right_player_face_position = detections.at(0);
@@ -253,7 +256,7 @@ void PlayerImageProcessor::set_player_masks(cv::Mat depth_frame)
 	cv::findContours(contour_image, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
 	for(unsigned int k=0;k<contours.size();k++){
 		if(contours.at(k).size() >= m_min_contour_size)
-			cv::floodFill(label_image, contours.at(k).at(0), cv::Scalar(255));
+			cv::floodFill(label_image, contours.at(k).at(0), cv::Scalar(254 - k));
 		else
 			cv::floodFill(label_image, contours.at(k).at(0), cv::Scalar(0));
 	}
@@ -267,6 +270,9 @@ void PlayerImageProcessor::set_player_masks(cv::Mat depth_frame)
 	cv::Mat right_player_half_image(m_right_player_mask, right_half);
 	cv::Mat right_half_mask(label_image, right_half);
 	right_half_mask.copyTo(right_player_half_image);
+
+	select_largest(left_player_half_image, contours.size());
+	select_largest(right_player_half_image, contours.size());
 
 	cv::Mat strel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(11, 11), cv::Point(5, 5));
 
@@ -313,6 +319,23 @@ void PlayerImageProcessor::set_player_masks(cv::Mat depth_frame)
 	}
 
 
+}
+
+void PlayerImageProcessor::select_largest(cv::Mat& label_image, int n_regions)
+{
+	//for each region, calculate area and return mask with only the largest one
+	//assume label image regions are numbered as 254 - k
+	int max_area = 0;
+	int max_index = 0;
+	for(int k=0;k<n_regions;k++){
+		cv::Mat region_mask(label_image == (254 -k));
+		int area = calc_area(region_mask);
+		if(area > max_area){
+			max_area = area;
+			max_index = 254 - k;
+		}
+	}
+	label_image = (label_image == max_index);
 }
 
 
