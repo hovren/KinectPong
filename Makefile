@@ -1,13 +1,18 @@
 CXXFLAGS =	-O2 -g -Wall -fmessage-length=0 -I/usr/include/libfreenect -I/usr/include/SDL2 -L/usr/local/lib
 
-OBJS =		src/main.o src/KinectPongGame.o src/KinectInput.o src/states/intro.o src/states/kinectview.o
+OBJS =		src/main.o src/KinectPongGame.o src/KinectInput.o src/states/intro.o src/states/kinectview.o src/states/WaitForPlayerState.o\
+ src/PlayerImageProcessor.o src/RoboRef.o src/EspeakInterface.o src/PanTiltInterface.o
 
-LIBS = -lopencv_core -lopencv_highgui -lopencv_imgproc -lfreenect -lSDL2 -lSDL2_image -lSDL2_ttf
+LIBS = -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_objdetect -lboost_system \
+-lfreenect -lSDL2 -lSDL2_image -lSDL2_ttf -lportaudio -lespeak
 
 TARGET =	KinectPong
 
+DEFS = -DBUILD_ROBOREF
+#DEFS = 
+
 $(TARGET):	$(OBJS)
-	$(CXX) -o $(TARGET) $(OBJS) $(LIBS)
+	$(CXX) $(DEFS) -o $(TARGET) $(OBJS) $(LIBS)
 
 
 ESPEAK_OBJS = src/EspeakInterface.o src/espeak_interface_test.o

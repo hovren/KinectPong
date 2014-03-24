@@ -65,6 +65,18 @@ private:
 	SDL_Texture* m_depth_tex;
 };
 
+class WaitForPlayerState : public GameState{
+public:
+	WaitForPlayerState(KinectPongGame*);
+	~WaitForPlayerState();
+	void handle_events(KinectInput*);
+	void handle_logic();
+	void render();
 
+private:
+	SDL_Texture* m_rgb_tex;
+	SDL_Texture* m_depth_tex;
+
+};
 
 #endif /* GAMESTATES_H_ */
