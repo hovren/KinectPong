@@ -12,6 +12,9 @@ PlayerImageProcessor::PlayerImageProcessor() {
 	m_far_limit = 0;
 	m_min_contour_size = 500;
 
+	m_min_player_area = 300;
+	m_max_player_area = 640*480/3;
+
 	m_left_player_face_depth = 0;
 	m_left_player_face_position.x = 0;
 	m_left_player_face_position.y = 0;
@@ -344,7 +347,10 @@ void PlayerImageProcessor::select_largest(cv::Mat& label_image, int n_regions)
 			max_index = 254 - k;
 		}
 	}
-	label_image = (label_image == max_index);
+	if((max_area > m_min_player_area) && (max_area <= m_max_player_area))
+		label_image = (label_image == max_index);
+	else
+		label_image.setTo(0);
 }
 
 

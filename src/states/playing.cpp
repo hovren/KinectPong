@@ -90,11 +90,11 @@ void PlayingState::handle_events(KinectInput* kinect) {
 	cv::Mat depth, rgb;
 	if (m_game->get_kinect()->poll_data(rgb, depth)) {
 		m_game->get_image_processor()->set_player_masks(depth);
-		m_game->get_image_processor()->find_player_faces(rgb, depth);
+	    //m_game->get_image_processor()->find_player_faces(rgb, depth);
 
 		cv::Mat left_contact_mask;
 		m_game->get_image_processor()->get_left_player_contact_mask(left_contact_mask);
-		m_game->get_gameboard()->get_player(0)->paddle_input(left_contact_mask);
+		//m_game->get_gameboard()->get_player(0)->paddle_input(left_contact_mask);
 		//m_player_tex[0] = m_game->texture_from_mat(left_contact_mask);
 
 		cv::Mat right_contact_mask;

@@ -67,6 +67,8 @@ private:
 	unsigned int m_min_contour_size;
 	cv::Size m_min_face_size;
 	cv::Size m_max_face_size;
+	int m_min_player_area;
+	int m_max_player_area;
 
 };
 
