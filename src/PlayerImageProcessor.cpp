@@ -8,11 +8,11 @@
 #include "PlayerImageProcessor.h"
 
 PlayerImageProcessor::PlayerImageProcessor() {
-	m_near_limit = 0;
-	m_far_limit = 0;
+	m_near_limit = 600;
+	m_far_limit = 2000;
 	m_min_contour_size = 500;
 
-	m_min_player_area = 300;
+	m_min_player_area = 500;
 	m_max_player_area = 640*480/3;
 
 	m_left_player_face_depth = 0;
