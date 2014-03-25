@@ -80,7 +80,7 @@ void WaitForPlayerState::handle_events(KinectInput* input)
 
 		m_game->get_roboref()->speak("Let's play Pong");
 		#endif
-		m_game->set_next_state(STATE_PLAYING);
+		m_game->set_next_state(STATE_PLAY_SERVE);
 	}
 
 	SDL_Event e;
@@ -90,7 +90,7 @@ void WaitForPlayerState::handle_events(KinectInput* input)
 			m_game->set_next_state(STATE_EXIT);
 			break;
 		case SDL_KEYDOWN:
-			m_game->set_next_state(STATE_PLAYING);
+			m_game->set_next_state(STATE_PLAY_SERVE);
 			break;
 		}
 	} // end SDL_PollEvent

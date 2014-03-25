@@ -24,8 +24,15 @@ KinectPongGame::KinectPongGame() : m_kinect(true){
 		m_gray_palette->colors[i].g = i;
 		m_gray_palette->colors[i].b = i;
 	}
-
-	m_gameboard = new GameBoard();
+	m_state_id = STATE_NULL;
+	m_current_state = NULL;
+	m_next_state = STATE_NULL;
+	m_gameboard = NULL;
+	m_rgb_tex = NULL;
+	m_window = NULL;
+	m_renderer = NULL;
+	m_screen_width = 0;
+	m_screen_height = 0;
 }
 
 KinectPongGame::~KinectPongGame() {
@@ -38,6 +45,7 @@ void KinectPongGame::run(void) {
 
 	m_state_id = STATE_INTRO;
 	//m_state_id = STATE_PLAYING;
+	//m_state_id = STATE_PLAY_SERVE;
 
 	switch (m_state_id) {
 	case STATE_INTRO:
@@ -45,6 +53,9 @@ void KinectPongGame::run(void) {
 		break;
 	case STATE_PLAYING:
 		m_current_state = new PlayingState(this);
+		break;
+	case STATE_PLAY_SERVE:
+		m_current_state = new ServePlayState(this, 4.0);
 		break;
 	}
 
@@ -102,6 +113,9 @@ bool KinectPongGame::init(bool fullscreen) {
 	m_roboref.connect("/dev/ttyUSB0");
 	#endif
 
+	// Create the game board
+	m_gameboard = new GameBoard(this);
+
 	return true;
 }
 
@@ -153,6 +167,13 @@ void KinectPongGame::change_state() {
 			break;
 		case STATE_PLAYING:
 			m_current_state = new PlayingState(this);
+			break;
+		case STATE_PLAY_SERVE:
+			m_current_state = new ServePlayState(this, 4.0);
+			break;
+		case STATE_PLAY_SCORE:
+			std::cout << "Player scored" << std::endl;
+			m_current_state = new PlayerScoredState(this);
 			break;
 		}
 

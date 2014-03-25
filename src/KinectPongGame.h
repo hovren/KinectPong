@@ -9,12 +9,11 @@
 #define KINECTPONGGAME_H_
 
 //temporary definition
-#define BUILD_ROBOREF
+//#define BUILD_ROBOREF
 
 #include <SDL2/SDL.h>
 #include <opencv2/core/core.hpp>
 #include "KinectInput.h"
-#include "GameBoard.h"
 #include "PlayerImageProcessor.h"
 
 //build with or without RoboRef support
@@ -24,6 +23,7 @@
 //#include "states/GameStates.h"
 
 class GameState;
+class GameBoard;
 
 class KinectPongGame {
 public:
@@ -35,6 +35,7 @@ public:
 	void set_next_state(int new_state);
 	SDL_Renderer* renderer() { return m_renderer; }
 	KinectInput* get_kinect() { return &m_kinect; }
+	SDL_Surface* get_window_surface() { return SDL_GetWindowSurface(m_window); }
 	PlayerImageProcessor* get_image_processor() { return &m_image_processor;}
 	#ifdef BUILD_ROBOREF
 	RoboRef* get_roboref() { return &m_roboref;}
