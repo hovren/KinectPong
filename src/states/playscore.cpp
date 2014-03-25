@@ -21,6 +21,11 @@
 #define CB_BOX_WIDTH 0.05
 #define CB_BOX_PADDING 0.01
 
+#define FACE_WIDTH 0.3
+#define FACE_POS_Y 0.20
+
+#define SCORE_WAIT_PERIOD 3.0
+
 PlayerScoredState::PlayerScoredState(KinectPongGame* game) {
 	m_game = game;
 	m_tick_start = SDL_GetTicks();
@@ -55,12 +60,19 @@ PlayerScoredState::PlayerScoredState(KinectPongGame* game) {
 	m_text_scored = SDL_CreateTextureFromSurface(m_game->renderer(), surf);
 	SDL_FreeSurface(surf);
 
+	cv::Mat face;
+	m_game->get_image_processor()->get_left_player_face_image(face);
+	m_face_player_1 = m_game->texture_from_mat(face);
+	m_game->get_image_processor()->get_right_player_face_image(face);
+	m_face_player_2 = m_game->texture_from_mat(face);
 }
 
 PlayerScoredState::~PlayerScoredState() {
 	// Do nothing
 	SDL_DestroyTexture(m_text_player_1);
 	SDL_DestroyTexture(m_text_player_2);
+	SDL_DestroyTexture(m_face_player_1);
+	SDL_DestroyTexture(m_face_player_2);
 	SDL_DestroyTexture(m_text_scored);
 }
 
@@ -69,7 +81,7 @@ void PlayerScoredState::handle_events(KinectInput* kinect) {
 }
 
 void PlayerScoredState::handle_logic() {
-	if ((SDL_GetTicks() - m_tick_start) / 1000.0 > 5.0) {
+	if ((SDL_GetTicks() - m_tick_start) / 1000.0 > SCORE_WAIT_PERIOD) {
 		m_game->set_next_state(STATE_PLAY_SERVE);
 	}
 }
@@ -118,23 +130,29 @@ void PlayerScoredState::render() {
 	text_box_rect.h = m_game->norm2pixel_y(0.1);
 
 	SDL_Rect scores_text_rect = text_box_rect;
-	scores_text_rect.y += m_game->norm2pixel_y(0.1);
+	scores_text_rect.y += m_game->norm2pixel_y(0.15);
 
-	SDL_SetRenderDrawColor(renderer, 128, 128, 128 , 255);
-	SDL_RenderFillRect(renderer, &score_box_rect);
+	SDL_Rect face_rect;
+	face_rect.x = m_game->norm2pixel_x(0.5-0.5*FACE_WIDTH);
+	face_rect.y = m_game->norm2pixel_y(FACE_POS_Y-0.5*FACE_WIDTH);
+	face_rect.w = m_game->norm2pixel_x(FACE_WIDTH);
+	face_rect.h = m_game->norm2pixel_y(FACE_WIDTH);
+
 	SDL_Rect text_rect;
 	switch (gameboard->get_event()) {
 	case GAMEBOARD_EVENT_PLAYER_1_SCORED:
 		text_rect = fit_texture_inside(m_text_player_1, &text_box_rect);
 		SDL_RenderCopy(renderer, m_text_player_1, NULL, &text_rect);
+		SDL_RenderCopy(renderer, m_face_player_1, NULL, &face_rect);
 		break;
 	case GAMEBOARD_EVENT_PLAYER_2_SCORED:
 		text_rect = fit_texture_inside(m_text_player_2, &text_box_rect);
-		SDL_RenderCopy(renderer, m_text_player_2, NULL, &text_box_rect);
+		SDL_RenderCopy(renderer, m_text_player_2, NULL, &text_rect);
+		SDL_RenderCopy(renderer, m_face_player_2, NULL, &face_rect);
 		break;
 	}
 	//text_rect = fit_texture_inside(m_text_scored, &scores_text_rect);
-	text_rect.y += m_game->norm2pixel_y(0.1);
+	text_rect.y += m_game->norm2pixel_y(0.15);
 	SDL_RenderCopy(renderer, m_text_scored, NULL, &text_rect);
 
 	// Present and delay
