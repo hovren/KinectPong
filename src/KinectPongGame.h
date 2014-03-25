@@ -35,6 +35,7 @@ public:
 	void set_next_state(int new_state);
 	SDL_Renderer* renderer() { return m_renderer; }
 	KinectInput* get_kinect() { return &m_kinect; }
+	SDL_Surface* get_window_surface() { return SDL_GetWindowSurface(m_window); }
 	PlayerImageProcessor* get_image_processor() { return &m_image_processor;}
 	#ifdef BUILD_ROBOREF
 	RoboRef* get_roboref() { return &m_roboref;}

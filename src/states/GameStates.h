@@ -31,6 +31,7 @@ enum GameStates {
 	STATE_INTRO,
 	STATE_KINECTVIEW,
 	STATE_WAITFORPLAYERS,
+	STATE_PLAY_SERVE,
 	STATE_PLAYING,
 	STATE_SHOWSCORE,
 	STATE_EXIT
@@ -70,13 +71,6 @@ private:
 
 //--------------------------------------------------
 
-enum PlayState {
-	PLAYSTATE_INIT,
-	PLAYSTATE_SERVE,
-	PLAYSTATE_PLAYING,
-	PLAYSTATE_SCORED
-};
-
 class PlayingState : public GameState {
 public:
 	PlayingState(KinectPongGame*);
@@ -89,8 +83,25 @@ private:
 	Uint32 m_last_tick;
 };
 
-class PlayingPlayingState : public PlayingState {
+class ServePlayState : public GameState {
+public:
+	ServePlayState(KinectPongGame*, float countdown);
+	~ServePlayState();
+	void handle_events(KinectInput*);
+	void handle_logic(); // No logic required
+	void render();
 
+private:
+	float m_countdown;
+	Uint32 m_tick_start;
+};
+
+class PlayerScoredState : public GameState {
+	PlayerScoredState(KinectPongGame*);
+	~PlayerScoredState();
+	void handle_events(KinectInput*);
+	void handle_logic(); // No logic required
+	void render();
 };
 
 class WaitForPlayerState : public GameState{

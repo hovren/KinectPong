@@ -37,7 +37,8 @@ void KinectPongGame::run(void) {
 	m_next_state = STATE_NULL;
 
 	//m_state_id = STATE_INTRO;
-	m_state_id = STATE_PLAYING;
+	//m_state_id = STATE_PLAYING;
+	m_state_id = STATE_PLAY_SERVE;
 
 	switch (m_state_id) {
 	case STATE_INTRO:
@@ -45,6 +46,9 @@ void KinectPongGame::run(void) {
 		break;
 	case STATE_PLAYING:
 		m_current_state = new PlayingState(this);
+		break;
+	case STATE_PLAY_SERVE:
+		m_current_state = new ServePlayState(this, 4.0);
 		break;
 	}
 

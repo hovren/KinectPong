@@ -31,8 +31,10 @@ public:
 	cv::Point2f screen2game(cv::Point2f sp);
 	cv::Point game2pixel(cv::Point2f gp);
 
+	void reset_ball();
 
 	void render_board_background();
+	void render_ball();
 	void render_board_all();
 
 private:

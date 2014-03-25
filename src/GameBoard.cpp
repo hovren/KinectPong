@@ -9,7 +9,7 @@
 #include "Player.h"
 
 #include <iostream>
-
+#include <cstdlib>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
@@ -157,6 +157,19 @@ void GameBoard::render_board_background() {
 	SDL_RenderDrawLine(renderer, l0.x, l0.y, l1.x, l1.y);
 }
 
+void GameBoard::render_ball() {
+	SDL_Rect ball_rect;
+	cv::Point2f ball_pos = game2screen(cv::Point2f(m_ball_pos.x - m_ball_radius, m_ball_pos.y - m_ball_radius));
+	std::cout << "Ball was at " << m_ball_pos << " and is now at " << ball_pos << std::endl;
+	ball_rect.x = m_game->norm2pixel_x(ball_pos.x);
+	ball_rect.y = m_game->norm2pixel_y(ball_pos.y);
+	cv::Point2f ball_dim = game2screen(cv::Point2f(m_ball_radius, 0));
+	ball_rect.h = ball_rect.w = m_game->norm2pixel_x(2*ball_dim.x);
+	SDL_Texture* ball_tex = m_game->get_gameboard()->get_ball_texture();
+	std::cout << "Rendering " << ball_tex << " at " << ball_rect.x << ", " << ball_rect.y << " size " << ball_rect.w << " x " << ball_rect.h << std::endl;
+	SDL_RenderCopy(m_game->renderer(), ball_tex, NULL, &ball_rect);
+}
+
 void GameBoard::render_board_all() {
 	SDL_Renderer* renderer = m_game->renderer();
 
@@ -182,15 +195,20 @@ void GameBoard::render_board_all() {
 	}
 
 	// Render ball
-	SDL_Rect ball_rect;
-	cv::Point2f ball_pos = game2screen(cv::Point2f(m_ball_pos.x - m_ball_radius, m_ball_pos.y - m_ball_radius));
-	std::cout << "Ball was at " << m_ball_pos << " and is now at " << ball_pos << std::endl;
-	ball_rect.x = m_game->norm2pixel_x(ball_pos.x);
-	ball_rect.y = m_game->norm2pixel_y(ball_pos.y);
-	cv::Point2f ball_dim = game2screen(cv::Point2f(m_ball_radius, 0));
-	ball_rect.h = ball_rect.w = m_game->norm2pixel_x(2*ball_dim.x);
-	SDL_Texture* ball_tex = m_game->get_gameboard()->get_ball_texture();
-	std::cout << "Rendering " << ball_tex << " at " << ball_rect.x << ", " << ball_rect.y << " size " << ball_rect.w << " x " << ball_rect.h << std::endl;
-	SDL_RenderCopy(renderer, ball_tex, NULL, &ball_rect);
+	render_ball();
 
+}
+
+static float random_between(float a, float b) {
+	float random = ((float) rand()) / (float) RAND_MAX;
+	float diff = b - a;
+	float r = random * diff;
+	return a + r;
+}
+
+void GameBoard::reset_ball() {
+	m_ball_pos = cv::Point2f(0.5, 0.5);
+	m_ball_velocity = cv::Point2f(random_between(-1,-1), random_between(-1,-1));
+	const float start_speed = 0.5;
+	m_ball_velocity = (start_speed / cv::norm(m_ball_velocity)) * m_ball_velocity; // Normalize to starting speed
 }
