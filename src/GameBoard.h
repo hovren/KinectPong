@@ -14,6 +14,12 @@
 
 class Player;
 
+enum GameBoardEvent {
+	GAMEBOARD_EVENT_NONE,
+	GAMEBOARD_EVENT_PLAYER_1_SCORED,
+	GAMEBOARD_EVENT_PLAYER_2_SCORED
+};
+
 class GameBoard {
 public:
 	GameBoard(KinectPongGame* game);
@@ -27,6 +33,7 @@ public:
 	cv::Point2f get_ball_velocity() { return m_ball_velocity; }
 	SDL_Texture* get_ball_texture() {return m_ball_tex; }
 	KinectPongGame* get_game() { return m_game; }
+	GameBoardEvent get_event() { return m_event; }
 	cv::Point2f game2screen(cv::Point2f gp);
 	cv::Point2f screen2game(cv::Point2f sp);
 	cv::Point game2pixel(cv::Point2f gp);
@@ -43,6 +50,8 @@ private:
 	cv::Point2f m_game_screen_pos; // Board position in world coordinate space [0, 1]
 	cv::Point2f m_game_screen_dims; // Board dimensions in pixels (640, 480)
 	SDL_Texture* m_ball_tex;
+
+	GameBoardEvent m_event;
 
 	// Players
 	Player* m_players[2];

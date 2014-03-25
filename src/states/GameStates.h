@@ -106,6 +106,9 @@ public:
 	void render();
 private:
 	Uint32 m_tick_start;
+	SDL_Texture* m_text_player_1;
+	SDL_Texture* m_text_player_2;
+	SDL_Texture* m_text_scored;
 };
 
 class WaitForPlayerState : public GameState{

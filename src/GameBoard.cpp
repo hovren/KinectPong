@@ -37,6 +37,8 @@ GameBoard::GameBoard(KinectPongGame* game) {
 
 	had_collision = false;
 
+	m_event = GAMEBOARD_EVENT_NONE;
+
 	// Graphics related
 	m_ball_tex = IMG_LoadTexture(m_game->renderer(), "window_icon.png");
 	if (!m_ball_tex) {
@@ -69,12 +71,14 @@ void GameBoard::update(float dt) {
 		//m_ball_velocity.x = -m_ball_velocity.x;
 		//had_collision = true;
 		m_players[0]->increase_score();
+		m_event = GAMEBOARD_EVENT_PLAYER_1_SCORED;
 	}
 	if (m_ball_pos.x + m_ball_radius > 1.0) {
 		m_ball_pos.x = 1.0 - m_ball_radius;
 		//m_ball_velocity.x = -m_ball_velocity.x;
 		//had_collision = true;
 		m_players[1]->increase_score();
+		m_event = GAMEBOARD_EVENT_PLAYER_2_SCORED;
 	}
 
 	// Collide with upper wall
@@ -197,6 +201,7 @@ static float random_between(float a, float b) {
 }
 
 void GameBoard::reset_ball() {
+	m_event = GAMEBOARD_EVENT_NONE;
 	m_ball_pos = cv::Point2f(0.5, 0.5);
 	m_ball_velocity = cv::Point2f(random_between(-1,-1), random_between(-1,-1));
 	const float start_speed = 0.5;

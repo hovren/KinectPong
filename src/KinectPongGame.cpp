@@ -43,9 +43,9 @@ void KinectPongGame::run(void) {
 
 	m_next_state = STATE_NULL;
 
-	m_state_id = STATE_INTRO;
+	//m_state_id = STATE_INTRO;
 	//m_state_id = STATE_PLAYING;
-	//m_state_id = STATE_PLAY_SERVE;
+	m_state_id = STATE_PLAY_SERVE;
 
 	switch (m_state_id) {
 	case STATE_INTRO:
