@@ -8,6 +8,7 @@ LIBS = -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_objdetect -lboos
 
 TARGET =	KinectPong
 
+#This definition is not used anymore
 #DEFS = -DBUILD_ROBOREF
 DEFS = 
 

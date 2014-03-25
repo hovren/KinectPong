@@ -28,7 +28,7 @@
 
 PlayerScoredState::PlayerScoredState(KinectPongGame* game) {
 	m_game = game;
-	m_tick_start = SDL_GetTicks();
+	m_tick_start = 0;
 	TTF_Font* font = TTF_OpenFont("font.ttf", 200);
 	if (!font) {
 		std::cout << "Error loading font: " << TTF_GetError() << std::endl;
@@ -61,9 +61,9 @@ PlayerScoredState::PlayerScoredState(KinectPongGame* game) {
 	SDL_FreeSurface(surf);
 
 	cv::Mat face;
-	m_game->get_image_processor()->get_left_player_face_image(face);
-	m_face_player_1 = m_game->texture_from_mat(face);
 	m_game->get_image_processor()->get_right_player_face_image(face);
+	m_face_player_1 = m_game->texture_from_mat(face);
+	m_game->get_image_processor()->get_left_player_face_image(face);
 	m_face_player_2 = m_game->texture_from_mat(face);
 }
 
@@ -81,7 +81,26 @@ void PlayerScoredState::handle_events(KinectInput* kinect) {
 }
 
 void PlayerScoredState::handle_logic() {
-	if ((SDL_GetTicks() - m_tick_start) / 1000.0 > SCORE_WAIT_PERIOD) {
+	if(m_tick_start == 0){
+		if(m_game->has_roboref()){
+			cv::Rect player_rect;
+			std::string cmdstr;
+			if(m_game->get_gameboard()->get_event() == GAMEBOARD_EVENT_PLAYER_1_SCORED){
+				player_rect = m_game->get_image_processor()->get_right_player_face_roi();
+				cmdstr = "Point to player 1";
+			}
+			else{
+				player_rect = m_game->get_image_processor()->get_left_player_face_roi();
+				cmdstr = "Point to player 2";
+			}
+			m_game->get_roboref()->look_at(cv::Point2f(player_rect.x + player_rect.width/2, player_rect.y + player_rect.height/2));
+			m_game->get_roboref()->speak(cmdstr);
+			m_game->get_roboref()->set_pan_tilt_angles(0, 0);
+		}
+		m_tick_start = SDL_GetTicks();
+	}
+
+	if ((SDL_GetTicks() - m_tick_start) / 1000.0 > 5.0) {
 		m_game->set_next_state(STATE_PLAY_SERVE);
 	}
 }
@@ -152,7 +171,7 @@ void PlayerScoredState::render() {
 		break;
 	}
 	//text_rect = fit_texture_inside(m_text_scored, &scores_text_rect);
-	text_rect.y += m_game->norm2pixel_y(0.15);
+	text_rect.y += m_game->norm2pixel_y(0.1);
 	SDL_RenderCopy(renderer, m_text_scored, NULL, &text_rect);
 
 	// Present and delay

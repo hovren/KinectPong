@@ -15,13 +15,15 @@
 #include <SDL2/SDL_image.h>
 #include <opencv2/imgproc/imgproc.hpp>
 
+#include "../Player.h"
+
 #define CB_BOX_WIDTH 0.05
 #define CB_BOX_PADDING 0.01
 
 ServePlayState::ServePlayState(KinectPongGame* game, float countdown) {
 	m_game = game;
 	m_countdown = countdown;
-	m_tick_start = SDL_GetTicks();
+	m_tick_start = 0;
 	std::cout << "Countdown started at " << m_tick_start << std::endl;
 
 	// Reset ball
@@ -37,6 +39,23 @@ void ServePlayState::handle_events(KinectInput* kinect) {
 }
 
 void ServePlayState::handle_logic() {
+
+
+	if(m_tick_start == 0){
+		if(m_game->has_roboref()){
+			std::stringstream ss;
+			ss << "Score is " <<  m_game->get_gameboard()->get_player(0)->score() << " to  " << m_game->get_gameboard()->get_player(1)->score() << std::endl;
+			std::string cmdstr;
+			std::string substr;
+			while(ss >> substr)
+				cmdstr += substr;
+
+			m_game->get_roboref()->speak(cmdstr);
+		}
+		m_tick_start = SDL_GetTicks();
+	}
+
+
 	if (SDL_GetTicks() > (m_tick_start + m_countdown*1000)) {
 		m_game->set_next_state(STATE_PLAYING);
 		std::cout << "Countdown completed at " << SDL_GetTicks() << std::endl;

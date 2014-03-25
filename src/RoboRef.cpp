@@ -56,7 +56,7 @@ void RoboRef::look_at(cv::Point2f pixel_position)
 	double norm = sqrt(pow(pn.at<float>(0, 0), 2) + pow(pn.at<float>(1, 0), 2) + pow(pn.at<float>(2, 0), 2));
 	std::cout << "NORM: " << norm << std::endl;
 	pn /= norm;
-	double pan_angle = -180.0/M_PI*pn.at<float>(0, 0); //pan axis is flipped
+	double pan_angle = 180.0/M_PI*pn.at<float>(0, 0); //pan axis is flipped twice due to image flip (so no sign change)
 	double tilt_angle = -180.0/M_PI*pn.at<float>(1, 0); //so is tilt
 	std::cout << "Setting angle to target: " << pan_angle << ", " << tilt_angle << std::endl;
 	std::vector<double> current_angles = m_pan_tilt_interface.get_position_angles();
@@ -65,5 +65,5 @@ void RoboRef::look_at(cv::Point2f pixel_position)
 
 void RoboRef::speak(std::string text)
 {
-	m_espeak_interface.speak(text);
+	m_espeak_interface.speak(text + "\n");
 }
