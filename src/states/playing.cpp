@@ -55,14 +55,13 @@ void PlayingState::handle_events(KinectInput* kinect) {
 		//face detector is too slow to run in this loop
 	    //m_game->get_image_processor()->find_player_faces(rgb, depth);
 
-		cv::Mat left_contact_mask;
-		m_game->get_image_processor()->get_left_player_contact_mask(left_contact_mask);
-		m_game->get_gameboard()->get_player(0)->paddle_input(left_contact_mask);
-
-
 		cv::Mat right_contact_mask;
 		m_game->get_image_processor()->get_right_player_contact_mask(right_contact_mask);
-		m_game->get_gameboard()->get_player(1)->paddle_input(right_contact_mask);
+		m_game->get_gameboard()->get_player(0)->paddle_input(right_contact_mask);
+
+		cv::Mat left_contact_mask;
+		m_game->get_image_processor()->get_left_player_contact_mask(left_contact_mask);
+		m_game->get_gameboard()->get_player(1)->paddle_input(left_contact_mask);
 	}
 
 	SDL_Event e;

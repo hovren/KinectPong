@@ -52,9 +52,9 @@ int main(int argc, char** argv)
 
 		cv::Mat dummy = cv::Mat::zeros(left_player_mask.rows, left_player_mask.cols, left_player_mask.type());
 		std::vector<cv::Mat> channels;
-		channels.push_back(left_player_mask);
-		channels.push_back(left_contact_mask + right_contact_mask);
 		channels.push_back(right_player_mask);
+		channels.push_back(left_contact_mask + right_contact_mask);
+		channels.push_back(left_player_mask);
 
 		cv::Mat visimg;
 		cv::merge(channels, visimg);
@@ -79,8 +79,8 @@ int main(int argc, char** argv)
 			processor.get_right_player_face_image(right_player_face);
 			cv::Mat right_face_region(visimg, right_face_window);
 			right_player_face.copyTo(right_face_region);
-			cv::rectangle(visimg, right_roi, cv::Scalar(0, 255, 0), 5);
-			cv::rectangle(visimg, right_face_window, cv::Scalar(0, 255, 0), 5);
+			cv::rectangle(visimg, right_roi, cv::Scalar(0, 255, 255), 5);
+			cv::rectangle(visimg, right_face_window, cv::Scalar(0, 255, 255), 5);
 		}
 
 		cv::cvtColor(rgb_frame, bgr_frame, CV_RGB2BGR);

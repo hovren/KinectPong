@@ -203,7 +203,7 @@ static float random_between(float a, float b) {
 void GameBoard::reset_ball() {
 	m_event = GAMEBOARD_EVENT_NONE;
 	m_ball_pos = cv::Point2f(0.5, 0.5);
-	m_ball_velocity = cv::Point2f(random_between(-1,-1), random_between(-1,-1));
+	m_ball_velocity = cv::Point2f(random_between(-1,1), random_between(-1,1));
 	const float start_speed = 0.5;
 	m_ball_velocity = (start_speed / cv::norm(m_ball_velocity)) * m_ball_velocity; // Normalize to starting speed
 }

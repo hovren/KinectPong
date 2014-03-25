@@ -44,7 +44,7 @@ void KinectViewState::handle_events(KinectInput* kinect) {
 		cv::Mat right_player_contact_mask;
 		m_game->get_image_processor()->get_right_player_contact_mask(right_player_contact_mask);
 		cv::max(rgb_channels.at(0), left_player_mask, rgb_channels.at(0));
-		cv::max(rgb_channels.at(0), right_player_mask, rgb_channels.at(0));
+		cv::max(rgb_channels.at(2), right_player_mask, rgb_channels.at(2));
 		cv::max(rgb_channels.at(1), left_player_contact_mask, rgb_channels.at(1));
 		cv::max(rgb_channels.at(1), right_player_contact_mask, rgb_channels.at(1));
 		cv::Mat rgb_tex;

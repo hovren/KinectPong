@@ -48,11 +48,16 @@ void WaitForPlayerState::handle_events(KinectInput* input)
 		cv::Mat right_player_contact_mask;
 		m_game->get_image_processor()->get_right_player_contact_mask(right_player_contact_mask);
 		cv::max(rgb_channels.at(0), left_player_mask, rgb_channels.at(0));
-		cv::max(rgb_channels.at(0), right_player_mask, rgb_channels.at(0));
+		cv::max(rgb_channels.at(2), right_player_mask, rgb_channels.at(2));
 		cv::max(rgb_channels.at(1), left_player_contact_mask, rgb_channels.at(1));
 		cv::max(rgb_channels.at(1), right_player_contact_mask, rgb_channels.at(1));
 		cv::Mat rgb_tex;
 		cv::merge(rgb_channels, rgb_tex);
+		if(m_game->get_image_processor()->got_right_face())
+			cv::rectangle(rgb_tex, m_game->get_image_processor()->get_right_player_face_roi(), cv::Scalar(255, 255, 0), 5);
+		if(m_game->get_image_processor()->got_left_face())
+			cv::rectangle(rgb_tex, m_game->get_image_processor()->get_left_player_face_roi(), cv::Scalar(0, 255, 255), 5);
+
 		m_rgb_tex = m_game->texture_from_mat(rgb_tex);
 
 		cv::Mat depth_show;
@@ -65,7 +70,7 @@ void WaitForPlayerState::handle_events(KinectInput* input)
 
 	if(m_game->get_image_processor()->got_left_face() && m_game->get_image_processor()->got_right_face()){
 		if(m_game->has_roboref()){
-			cv::Rect left_face = m_game->get_image_processor()->get_left_player_face_roi();
+			cv::Rect left_face = m_game->get_image_processor()->get_right_player_face_roi();
 
 			//look at left player
 			m_game->get_roboref()->look_at(cv::Point(left_face.x + left_face.width/2, left_face.y + left_face.height/2));
@@ -73,7 +78,7 @@ void WaitForPlayerState::handle_events(KinectInput* input)
 			m_game->get_roboref()->set_pan_tilt_angles(0, 0);
 
 			//look at right player
-			cv::Rect right_face = m_game->get_image_processor()->get_right_player_face_roi();
+			cv::Rect right_face = m_game->get_image_processor()->get_left_player_face_roi();
 			m_game->get_roboref()->look_at(cv::Point(right_face.x + right_face.width/2, right_face.y + right_face.height/2));
 			m_game->get_roboref()->speak("Second player detected");
 			m_game->get_roboref()->set_pan_tilt_angles(0, 0);
