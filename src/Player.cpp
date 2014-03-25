@@ -67,55 +67,11 @@ void Player::paddle_input(cv::Mat mask) {
 	cv::blur(mask_roi, mask_blurred, cv::Size(3,3));
 	cv::Sobel(mask_blurred, deriv[0], CV_32F, 1, 0, 3);
 	cv::Sobel(mask_blurred, deriv[1], CV_32F, 0, 1, 3);
-	deriv[0] = cv::abs(deriv[0]);
-	deriv[1] = cv::abs(deriv[1]);
 
-	cv::imwrite("sobelx.png", deriv[0]);
-	cv::imwrite("sobely.png", deriv[1]);
-
-
-	//cv::blur(deriv[0], deriv[0], cv::Size(8,8));
-	//cv::blur(deriv[1], deriv[1], cv::Size(8,8));
-
-	//cv::imwrite("sobelx_blur.png", deriv[0]);
-	//cv::imwrite("sobely_blur.png", deriv[1]);
+	cv::blur(deriv[0], deriv[0], cv::Size(5,5));
+	cv::blur(deriv[1], deriv[1], cv::Size(5,5));
 
 	cv::merge(deriv, m_paddle_gradient);
-#if 0
-	std::cout << "c = array([" << std::endl;
-	for (int i=0; i < m_paddle_contour.size(); ++i) {
-		std::cout << m_paddle_contour[i] << ", " << std::endl;
-	}
-	std::cout << "])"<<std::endl;
-#endif
-
-	std::cout << m_paddle_gradient.depth() << " is CV_32F " << CV_32F << " two channels " << m_paddle_gradient.channels() << std::endl;
-
-	cv::Mat sobx_out, soby_out;
-	double max_val, min_val;
-	cv::minMaxLoc(deriv[0], &min_val, &max_val);
-	deriv[0].convertTo(sobx_out, CV_8UC1, 255.0 / (max_val - min_val), -min_val*255.0/(max_val - min_val));
-	cv::cvtColor(sobx_out, sobx_out, CV_GRAY2RGB);
-
-	for (int i=0; i < m_paddle_contour.size(); ++i) {
-		sobx_out.at<cv::Vec3b>(m_paddle_contour[i].y, m_paddle_contour[i].x)[0] = 0;
-		sobx_out.at<cv::Vec3b>(m_paddle_contour[i].y, m_paddle_contour[i].x)[1] = 0;
-		sobx_out.at<cv::Vec3b>(m_paddle_contour[i].y, m_paddle_contour[i].x)[2] = 255;
-	}
-
-	cv::imwrite("sobelx_rgb.png", sobx_out);
-
-
-
-#if 0
-	std::cout << "size and channels in gradient image " << m_paddle_gradient.cols << " x " << m_paddle_gradient.rows << " channels " << m_paddle_gradient.channels() << std::endl;
-	for (int r=0; r < m_paddle_gradient.rows; ++r) {
-		for (int c=0; c < m_paddle_gradient.cols; ++c) {
-			cv::Vec2f pixel = m_paddle_gradient.at<cv::Vec2f>(c, r);
-			std::cout << c << ", " << r << " : " << pixel << std::endl;
-		}
-	}
-#endif
 }
 
 bool in_circle(cv::Point2f pos, cv::Point2f circle_pos, float radius) {
@@ -193,7 +149,7 @@ bool Player::collision_line(cv::Point2f ball_pos, cv::Point2f ball_velocity,
 				float gradient_norm = cv::norm(gradient);
 				//std::cout << "value " << gradient << " norm " << gradient_norm << " mask val " << (unsigned int) m_paddle_mask.at<unsigned char>(cpos.x, cpos.y) << std::endl;
 				collision_normal.val[0] = gradient.val[0] / gradient_norm;
-				collision_normal.val[1] = -1.0 * gradient.val[1] / gradient_norm; // NOTE: OpenCV has other coordinate system?
+				collision_normal.val[1] = gradient.val[1] / gradient_norm;
 				collided = true;
 			}
 		}
