@@ -29,12 +29,17 @@ public:
 	KinectPongGame* get_game() { return m_game; }
 	cv::Point2f game2screen(cv::Point2f gp);
 	cv::Point2f screen2game(cv::Point2f sp);
+	cv::Point game2pixel(cv::Point2f gp);
+
+
+	void render_board_background();
+	void render_board_all();
 
 private:
 	KinectPongGame* m_game;
 
-	cv::Point2f m_game_screen_pos;
-	cv::Point2f m_game_screen_dims;
+	cv::Point2f m_game_screen_pos; // Board position in world coordinate space [0, 1]
+	cv::Point2f m_game_screen_dims; // Board dimensions in pixels (640, 480)
 	SDL_Texture* m_ball_tex;
 
 	// Players

@@ -29,6 +29,12 @@ GameBoard::GameBoard(KinectPongGame* game) {
 	m_ball_velocity.y = 0.0;
 	m_ball_radius = 0.01;
 
+	// Screen size and position in normed world coordinates
+	m_game_screen_dims.x = 1.0;
+	m_game_screen_dims.y = 1.0;
+	m_game_screen_pos.x = 0.0;
+	m_game_screen_pos.y = 0.0;
+
 	had_collision = false;
 
 	// Graphics related
@@ -129,4 +135,62 @@ cv::Point2f GameBoard::screen2game(cv::Point2f sp) {
 	gp.x = (sp.x - m_game_screen_pos.x) / m_game_screen_dims.x;
 	gp.y = (sp.y - m_game_screen_pos.y) / m_game_screen_dims.y;
 	return gp;
+}
+
+cv::Point GameBoard::game2pixel(cv::Point2f gp) {
+	cv::Point p(m_game->norm2pixel_x(gp.x), m_game->norm2pixel_y(gp.y));
+	return p;
+}
+
+void GameBoard::render_board_background() {
+	SDL_Renderer* renderer = m_game->renderer();
+
+	// Background color
+	SDL_SetRenderDrawColor(renderer, 60, 60, 80, 255);
+	SDL_RenderClear(renderer);
+
+	// Draw middle line
+	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 128);
+	cv::Point l0, l1;
+	l0 = game2pixel(cv::Point2f(0.5, 0.0));
+	l1 = game2pixel(cv::Point2f(0.5, 1.0));
+	SDL_RenderDrawLine(renderer, l0.x, l0.y, l1.x, l1.y);
+}
+
+void GameBoard::render_board_all() {
+	SDL_Renderer* renderer = m_game->renderer();
+
+	// Background
+	render_board_background();
+
+	// Render paddle
+	for (int i=0; i < 2; ++i) {
+		Player* player = get_player(i);
+		SDL_Texture* paddle_tex = player->get_paddle_texture();
+		if (paddle_tex) {
+			SDL_Rect paddle_rect;
+			//cv::Point2f paddle_pos(m_player_data[player].paddle_x, m_player_data[player].paddle_y);
+			cv::Rect_<float> paddle_rect_norm = player->get_paddle_rect();
+			cv::Point padd_pos = game2pixel(cv::Point2f(paddle_rect_norm.x, paddle_rect_norm.y));
+			cv::Point padd_dim = game2pixel(cv::Point2f(paddle_rect_norm.width, paddle_rect_norm.height));
+			paddle_rect.x = padd_pos.x;
+			paddle_rect.y = padd_pos.y;
+			paddle_rect.w = padd_dim.x;
+			paddle_rect.h = padd_dim.y;
+			SDL_RenderCopy(renderer, paddle_tex, NULL, &paddle_rect);
+		}
+	}
+
+	// Render ball
+	SDL_Rect ball_rect;
+	cv::Point2f ball_pos = game2screen(cv::Point2f(m_ball_pos.x - m_ball_radius, m_ball_pos.y - m_ball_radius));
+	std::cout << "Ball was at " << m_ball_pos << " and is now at " << ball_pos << std::endl;
+	ball_rect.x = m_game->norm2pixel_x(ball_pos.x);
+	ball_rect.y = m_game->norm2pixel_y(ball_pos.y);
+	cv::Point2f ball_dim = game2screen(cv::Point2f(m_ball_radius, 0));
+	ball_rect.h = ball_rect.w = m_game->norm2pixel_x(2*ball_dim.x);
+	SDL_Texture* ball_tex = m_game->get_gameboard()->get_ball_texture();
+	std::cout << "Rendering " << ball_tex << " at " << ball_rect.x << ", " << ball_rect.y << " size " << ball_rect.w << " x " << ball_rect.h << std::endl;
+	SDL_RenderCopy(renderer, ball_tex, NULL, &ball_rect);
+
 }

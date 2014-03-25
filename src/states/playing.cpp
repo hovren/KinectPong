@@ -18,47 +18,6 @@
 #define DEFAULT_BALL_RADIUS 0.015
 #define MIN_BALL_RADIUS_PIXELS 10
 
-
-
-SDL_Texture* create_ball_texture(int pixel_radius, SDL_Renderer* renderer) {
-	int r = pixel_radius;
-	int surf_length = 2*r + 1;
-	SDL_Surface* surf = SDL_CreateRGBSurface(0, surf_length, surf_length, 32, 0xff000000, 0x00ff0000, 0x0000ff00, 0x000000ff);
-	if (!surf) {
-		std::cout << "Could not create ball surface: " << SDL_GetError() << std::endl;
-		return NULL;
-	}
-	std::cout << "Ball surface created of size " << surf->w << " x " << surf->h << " pitch " << surf->pitch << std::endl;
-	Uint32* pixels = (Uint32*) surf->pixels;
-	for (int y=-r; y <= r; ++y) {
-		int py = y + r;
-		for (int x=-r; x <= r; ++x) {
-			int px = x + r;
-			int index = py*(surf->pitch/sizeof(Uint32)) + px; // For 32-bit surfaces I believe pitch is defined differently
-			int dd = y*y + x*x;
-			if (dd < r*r) {
-				Uint32 alpha = ((Uint32) (128 + 128.0 * dd / (r*r))) & 0x000000ff;
-				//Uint32 alpha = (255 * (1.0 * dd / r*r)) & 0x000000ff;
-				Uint32 color = 0xff000000 | alpha;
-				pixels[index] = color; //0xff0000ff;
-			}
-			else {
-				pixels[index] = 0x00ff0000;
-			}
-		}
-	}
-	//SDL_SetSurfacePalette(surf, m_game->get_gray_palette());
-	SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surf);
-	if (!tex) {
-		std::cout << "Failed to create texture: " << SDL_GetError() << std::endl;
-	}
-	SDL_FreeSurface(surf);
-	return tex;
-}
-
-// ------------------------------------------------------
-
-
 PlayingState::PlayingState(KinectPongGame* game) {
 	std::cout << "Run constructor" << std::endl;
 	m_game = game;
@@ -132,54 +91,7 @@ void PlayingState::render() {
 	SDL_Renderer* renderer = m_game->renderer();
 	GameBoard* gameboard = m_game->get_gameboard();
 
-	// Render background
-	if (gameboard->had_collision) {
-		SDL_SetRenderDrawColor(renderer, 255, 40, 70, 255);
-	}
-	else {
-		SDL_SetRenderDrawColor(renderer, 40, 40, 70, 255);
-	}
-	SDL_RenderClear(renderer);
-
-	// Render paddle
-	for (int i=0; i < 2; ++i) {
-		Player* player = gameboard->get_player(i);
-		SDL_Texture* paddle_tex = m_game->get_gameboard()->get_player(i)->get_paddle_texture();
-		if (paddle_tex) {
-			SDL_Rect paddle_rect;
-			//cv::Point2f paddle_pos(m_player_data[player].paddle_x, m_player_data[player].paddle_y);
-			cv::Rect_<float> paddle_rect_norm = player->get_paddle_rect();
-			paddle_rect.x = m_game->norm2pixel_x(paddle_rect_norm.x);
-			paddle_rect.y = m_game->norm2pixel_y(paddle_rect_norm.y);
-			paddle_rect.w = m_game->norm2pixel_x(paddle_rect_norm.width);
-			paddle_rect.h = m_game->norm2pixel_y(paddle_rect_norm.height);
-			SDL_RenderCopy(renderer, paddle_tex, NULL, &paddle_rect);
-		}
-	}
-
-	// Render ball
-	SDL_Rect ball_rect;
-	cv::Point2f ball_pos = gameboard->get_ball_position();
-	float ball_radius = gameboard->get_ball_radius();
-	ball_rect.x = m_game->norm2pixel_x(ball_pos.x - ball_radius);
-	ball_rect.y = m_game->norm2pixel_y(ball_pos.y - ball_radius);
-	ball_rect.h = ball_rect.w = m_game->norm2pixel_x(2*ball_radius);
-	//std::cout << "Ball Pos: " << ball_rect.x << ", " << ball_rect.y << " dim " << ball_rect.w << ", " << ball_rect.h << std::endl;
-	std::cout << "Render ball at " << ball_rect.x << ", " << ball_rect.y << " " << ball_rect.w << " x " << ball_rect.h << std::endl;
-	SDL_Texture* ball_tex = m_game->get_gameboard()->get_ball_texture();
-	std::cout << "Ball texture " << ball_tex << std::endl;
-	SDL_RenderCopy(renderer, ball_tex, NULL, &ball_rect);
-
-	// Render game board
-	cv::Point2f gb0(0.0, 0.0);
-	cv::Point2f gbdim(1.0, 1.0);
-	SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255); // yellow
-	cv::Point2f gb0_s = m_game->get_gameboard()->game2screen(gb0);
-	cv::Point2f gbdim_s = m_game->get_gameboard()->game2screen(gbdim);
-	SDL_RenderDrawLine(renderer, m_game->norm2pixel_x(gb0_s.x), m_game->norm2pixel_y(gb0_s.y), m_game->norm2pixel_x(gbdim_s.x), m_game->norm2pixel_y(gb0_s.y));
-	SDL_RenderDrawLine(renderer, m_game->norm2pixel_x(gb0_s.x), m_game->norm2pixel_y(gb0_s.y), m_game->norm2pixel_x(gb0_s.x), m_game->norm2pixel_y(gbdim_s.y));
-	SDL_RenderDrawLine(renderer, m_game->norm2pixel_x(gbdim_s.x), m_game->norm2pixel_y(gb0_s.y), m_game->norm2pixel_x(gbdim_s.x), m_game->norm2pixel_y(gbdim_s.y));
-	SDL_RenderDrawLine(renderer, m_game->norm2pixel_x(gb0_s.x), m_game->norm2pixel_y(gbdim_s.y), m_game->norm2pixel_x(gbdim_s.x), m_game->norm2pixel_y(gbdim_s.y));
+	gameboard->render_board_all();
 
 	// Present and delay
 	SDL_RenderPresent(renderer);
