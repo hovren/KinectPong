@@ -11,6 +11,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_image.h>
 
 GameBoard::GameBoard(KinectPongGame* game) {
@@ -22,6 +23,8 @@ GameBoard::GameBoard(KinectPongGame* game) {
 
 	m_players[0]->set_name("Player 1");
 	m_players[1]->set_name("Player 2");
+	m_player_1_score_surf = NULL;
+	m_player_2_score_surf = NULL;
 
 	m_ball_pos.x = 0.85;
 	m_ball_pos.y = 0.12;
@@ -170,6 +173,9 @@ void GameBoard::render_board_all() {
 	// Background
 	render_board_background();
 
+	// Current Score
+	render_scores();
+
 	// Render paddle
 	for (int i=0; i < 2; ++i) {
 		Player* player = get_player(i);
@@ -206,4 +212,60 @@ void GameBoard::reset_ball() {
 	m_ball_velocity = cv::Point2f(random_between(-1,1), random_between(-1,1));
 	const float start_speed = 0.5;
 	m_ball_velocity = (start_speed / cv::norm(m_ball_velocity)) * m_ball_velocity; // Normalize to starting speed
+	update_score_textures();
+}
+
+void GameBoard::render_scores() {
+	SDL_Renderer* renderer = m_game->renderer();
+
+	const float score_height = 0.1;
+	const float score_margin = 0.01;
+	for (int i=0; i < 2; ++i) {
+		SDL_Surface* surf = (i == 0 ? m_player_1_score_surf : m_player_2_score_surf);
+		SDL_Rect dst;
+		float scale = ((float) m_game->norm2pixel_y(score_height)) / surf->h;
+		// Note: Player 1 is on the right, and player 2 is on the left
+		dst.x = m_game->norm2pixel_x(0.5) + (i == 1 ? -scale*surf->w - m_game->norm2pixel_x(score_margin) : m_game->norm2pixel_x(score_margin));
+		dst.y = m_game->norm2pixel_y(0.05);
+		dst.w = scale * surf->w;
+		dst.h = scale * surf->h;
+		std::cout << i << " " << dst.x << ", " << dst.y << " " << dst.w << " x " << dst.h << std::endl;
+		SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surf);
+		SDL_RenderCopy(renderer, tex, NULL, &dst);
+		SDL_DestroyTexture(tex);
+	}
+}
+
+void GameBoard::update_score_textures() {
+	TTF_Font* font = TTF_OpenFont("font.ttf", 200);
+	if (!font) {
+		std::cout << "Error loading font: " << TTF_GetError() << std::endl;
+	}
+
+	if (m_player_1_score_surf) {
+		SDL_FreeSurface(m_player_1_score_surf);
+	}
+	if (m_player_2_score_surf) {
+		SDL_FreeSurface(m_player_2_score_surf);
+	}
+
+
+	SDL_Surface* surf;
+	SDL_Color text_color;
+	text_color.r = text_color.g = text_color.b = text_color.a = 255;
+	char score_buf[8];
+
+	sprintf(score_buf, "%d", get_player(0)->score());
+	std::cout << "Player 1 score " << get_player(0)->score() << " and " << score_buf << std::endl;
+	m_player_1_score_surf = TTF_RenderText_Blended(font, score_buf, text_color);
+	if (!surf) {
+		std::cout << "Error: " << TTF_GetError() << std::endl;
+	}
+
+	sprintf(score_buf, "%d", get_player(1)->score());
+	std::cout << "Player 2 score " << get_player(1)->score() << " and " << score_buf << std::endl;
+	m_player_2_score_surf = TTF_RenderText_Blended(font, score_buf, text_color);
+	if (!surf) {
+		std::cout << "Error: " << TTF_GetError() << std::endl;
+	}
 }

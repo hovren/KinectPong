@@ -60,6 +60,9 @@ void ServePlayState::render() {
 	// Board background
 	gameboard->render_board_background();
 
+	// Render score
+	gameboard->render_scores();
+
 	// Draw countdown circles
 	int seconds_left = m_countdown - (SDL_GetTicks() - m_tick_start) / 1000.0;
 

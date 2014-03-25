@@ -42,6 +42,7 @@ public:
 
 	void render_board_background();
 	void render_ball();
+	void render_scores();
 	void render_board_all();
 
 private:
@@ -55,6 +56,9 @@ private:
 
 	// Players
 	Player* m_players[2];
+	SDL_Surface* m_player_1_score_surf;
+	SDL_Surface* m_player_2_score_surf;
+	void update_score_textures();
 
 	// Ball
 	cv::Point2f m_ball_pos;
