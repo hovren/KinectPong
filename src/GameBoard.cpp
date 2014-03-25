@@ -63,23 +63,21 @@ void GameBoard::update(float dt) {
 	m_ball_pos.x += m_ball_velocity.x * dt;
 	m_ball_pos.y += m_ball_velocity.y * dt;
 
-	//std::cout << "Ball pos " << m_ball_pos.x << ", " << m_ball_pos.y << " velocity " << m_ball_velocity.x << ", " << m_ball_velocity.y << std::endl;
-
-	// Collide with walls
+	// Collide with score zones
 	if (m_ball_pos.x - m_ball_radius < 0) {
 		m_ball_pos.x = m_ball_radius;
-		m_ball_velocity.x = -m_ball_velocity.x;
-		//m_ball_vel_x = m_ball_vel_y = 0;
-		//std::cout << "Hit wall " << m_ball_pos_x << ", " << m_ball_pos_y << " radius " << m_ball_radius << std::endl;
-		had_collision = true;
+		//m_ball_velocity.x = -m_ball_velocity.x;
+		//had_collision = true;
+		m_players[0]->increase_score();
 	}
 	if (m_ball_pos.x + m_ball_radius > 1.0) {
 		m_ball_pos.x = 1.0 - m_ball_radius;
-		m_ball_velocity.x = -m_ball_velocity.x;
-		//m_ball_vel_x = m_ball_vel_y = 0;
-		//std::cout << "Hit wall " << m_ball_pos_x << ", " << m_ball_pos_y << " radius " << m_ball_radius << std::endl;
-		had_collision = true;
+		//m_ball_velocity.x = -m_ball_velocity.x;
+		//had_collision = true;
+		m_players[1]->increase_score();
 	}
+
+	// Collide with upper wall
 	if (m_ball_pos.y - m_ball_radius < 0) {
 		m_ball_pos.y = m_ball_radius;
 		m_ball_velocity.y = -m_ball_velocity.y;
@@ -94,14 +92,6 @@ void GameBoard::update(float dt) {
 		//std::cout << "Hit wall " << m_ball_pos_x << ", " << m_ball_pos_y << " radius " << m_ball_radius << std::endl;
 		had_collision = true;
 	}
-
-	///////////////////////
-	// OBS
-	// OBS
-	// OBS
-	////////////////////////
-	had_collision = false;
-
 
 	// Collide with players
 	cv::Vec2f collision_normal;
@@ -160,13 +150,13 @@ void GameBoard::render_board_background() {
 void GameBoard::render_ball() {
 	SDL_Rect ball_rect;
 	cv::Point2f ball_pos = game2screen(cv::Point2f(m_ball_pos.x - m_ball_radius, m_ball_pos.y - m_ball_radius));
-	std::cout << "Ball was at " << m_ball_pos << " and is now at " << ball_pos << std::endl;
+	//std::cout << "Ball was at " << m_ball_pos << " and is now at " << ball_pos << std::endl;
 	ball_rect.x = m_game->norm2pixel_x(ball_pos.x);
 	ball_rect.y = m_game->norm2pixel_y(ball_pos.y);
 	cv::Point2f ball_dim = game2screen(cv::Point2f(m_ball_radius, 0));
 	ball_rect.h = ball_rect.w = m_game->norm2pixel_x(2*ball_dim.x);
 	SDL_Texture* ball_tex = m_game->get_gameboard()->get_ball_texture();
-	std::cout << "Rendering " << ball_tex << " at " << ball_rect.x << ", " << ball_rect.y << " size " << ball_rect.w << " x " << ball_rect.h << std::endl;
+	//std::cout << "Rendering " << ball_tex << " at " << ball_rect.x << ", " << ball_rect.y << " size " << ball_rect.w << " x " << ball_rect.h << std::endl;
 	SDL_RenderCopy(m_game->renderer(), ball_tex, NULL, &ball_rect);
 }
 

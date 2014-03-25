@@ -19,6 +19,7 @@ Player::Player(GameBoard* gb) {
 	m_name = "Player";
 	m_paddle_tex = NULL;
 	m_gameboard = gb;
+	m_score = 0;
 }
 
 Player::~Player() {

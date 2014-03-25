@@ -81,7 +81,19 @@ void PlayingState::handle_logic() {
 
 	GameBoard* gameboard = m_game->get_gameboard();
 
+	int p1_score_prev = gameboard->get_player(0)->score();
+	int p2_score_prev = gameboard->get_player(1)->score();
 	gameboard->update(dt);
+	int p1_score = gameboard->get_player(0)->score();
+	int p2_score = gameboard->get_player(1)->score();
+
+	if (p1_score > p1_score_prev) {
+		m_game->set_next_state(STATE_PLAY_SCORE);
+	}
+	else if (p2_score > p2_score_prev) {
+		m_game->set_next_state(STATE_PLAY_SCORE);
+	}
+
 
 	// Update tick count (not safe for overflows, I guess, but we can play for 1200 hours before that happens...)
 	m_last_tick = curr_tick;
