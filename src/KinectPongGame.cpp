@@ -114,9 +114,10 @@ bool KinectPongGame::init(bool fullscreen) {
 	try{
 		m_roboref.connect("/dev/ttyUSB0");
 		std::cout << "RoboRef connected on /dev/ttyUSB0" << std::endl;
+		m_roboref.speak("RoboRef connected");
 		m_has_roboref = true;
 	}
-	catch(int e){
+	catch(std::exception& e){
 		std::cout << "No RoboRef found, disabling..." << std::endl;
 	}
 
