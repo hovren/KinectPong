@@ -18,6 +18,7 @@ public:
 
 	void paddle_input(cv::Mat mask);
 	bool collision(cv::Point2f ball_pos, float ball_radius, cv::Vec2f& collision_normal); // (x,y,r) -> (has_collided, normal)
+	bool collision_line(cv::Point2f ball_pos, cv::Point2f ball_velocity, float ball_radius, float dt, cv::Vec2f& collision_normal, cv::Point2f& collision_point);
 
 	void set_name(std::string name) { m_name = name; };
 	cv::Rect_<float> get_paddle_rect() { return m_paddle_rect; }
