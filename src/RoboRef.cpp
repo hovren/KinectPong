@@ -65,5 +65,5 @@ void RoboRef::look_at(cv::Point2f pixel_position)
 
 void RoboRef::speak(std::string text)
 {
-	m_espeak_interface.speak(text);
+	m_espeak_interface.speak(text + "\n");
 }

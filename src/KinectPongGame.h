@@ -16,10 +16,9 @@
 #include "KinectInput.h"
 #include "PlayerImageProcessor.h"
 
-//build with or without RoboRef support
-#ifdef BUILD_ROBOREF
+//build with RoboRef support
 #include "RoboRef.h"
-#endif
+
 //#include "states/GameStates.h"
 
 class GameState;
@@ -37,11 +36,10 @@ public:
 	KinectInput* get_kinect() { return &m_kinect; }
 	SDL_Surface* get_window_surface() { return SDL_GetWindowSurface(m_window); }
 	PlayerImageProcessor* get_image_processor() { return &m_image_processor;}
-	#ifdef BUILD_ROBOREF
 	RoboRef* get_roboref() { return &m_roboref;}
-	#endif
 	SDL_Texture* texture_from_mat(cv::Mat&);
 	SDL_Palette* get_gray_palette() { return m_gray_palette; }
+	bool has_roboref() {return m_has_roboref;}
 	float get_aspect_ratio();
 	int norm2pixel_x(float x);
 	int norm2pixel_y(float y);
@@ -57,9 +55,8 @@ private:
 	KinectInput m_kinect;
 	GameBoard* m_gameboard;
 	PlayerImageProcessor m_image_processor;
-	#ifdef BUILD_ROBOREF
 	RoboRef m_roboref;
-	#endif
+	bool m_has_roboref;
 
 	// Game state handling (credit to lazyfoo.net)
 	GameState* m_current_state;

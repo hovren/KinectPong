@@ -20,7 +20,7 @@
 
 PlayerScoredState::PlayerScoredState(KinectPongGame* game) {
 	m_game = game;
-	m_tick_start = SDL_GetTicks();
+	m_tick_start = 0;
 }
 
 PlayerScoredState::~PlayerScoredState() {
@@ -32,6 +32,16 @@ void PlayerScoredState::handle_events(KinectInput* kinect) {
 }
 
 void PlayerScoredState::handle_logic() {
+	if(m_tick_start == 0){
+		if(m_game->has_roboref()){
+			cv::Rect player_rect = m_game->get_image_processor()->get_left_player_face_roi();
+			m_game->get_roboref()->look_at(cv::Point2f(player_rect.x + player_rect.width/2, player_rect.y + player_rect.height/2));
+			m_game->get_roboref()->speak("Point to someone");
+			m_game->get_roboref()->set_pan_tilt_angles(0, 0);
+		}
+		m_tick_start = SDL_GetTicks();
+	}
+
 	if ((SDL_GetTicks() - m_tick_start) / 1000.0 > 5.0) {
 		m_game->set_next_state(STATE_PLAY_SERVE);
 	}

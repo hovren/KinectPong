@@ -13,6 +13,7 @@
 #include <libfreenect/libfreenect.hpp>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
+#include <stdexcept>
 
 #include "states/GameStates.h"
 
@@ -33,6 +34,7 @@ KinectPongGame::KinectPongGame() : m_kinect(true){
 	m_renderer = NULL;
 	m_screen_width = 0;
 	m_screen_height = 0;
+	m_has_roboref = false;
 }
 
 KinectPongGame::~KinectPongGame() {
@@ -109,9 +111,14 @@ bool KinectPongGame::init(bool fullscreen) {
 	m_image_processor.set_far_limit(2000);
 
 	//Initialise RoboRef if present
-	#ifdef BUILD_ROBOREF
-	m_roboref.connect("/dev/ttyUSB0");
-	#endif
+	try{
+		m_roboref.connect("/dev/ttyUSB0");
+		std::cout << "RoboRef connected on /dev/ttyUSB0" << std::endl;
+		m_has_roboref = true;
+	}
+	catch(int e){
+		std::cout << "No RoboRef found, disabling..." << std::endl;
+	}
 
 	// Create the game board
 	m_gameboard = new GameBoard(this);

@@ -28,10 +28,10 @@ PlayingState::PlayingState(KinectPongGame* game) {
 	//cv::Mat test_mask; //(cv::Size(640, 480), CV_8U);
 
 	cv::Mat test_mask = cv::Mat::zeros(cv::Size(640, 480), CV_8U);
-	cv::circle(test_mask, cv::Point(100, 70), 50, cv::Scalar(255), -1);
+	/*cv::circle(test_mask, cv::Point(100, 70), 50, cv::Scalar(255), -1);
 	cv::rectangle(test_mask, cv::Point(100, 20), cv::Point(350, 450), cv::Scalar(0), -1);
 	cv::Mat rot_mat = cv::getRotationMatrix2D(cv::Point2f(100, 70), 30.0, 1.0);
-	cv::warpAffine(test_mask, test_mask, rot_mat, test_mask.size());
+	cv::warpAffine(test_mask, test_mask, rot_mat, test_mask.size());*/
 	for (int i=0; i < 2; ++i) {
 		Player* player = m_game->get_gameboard()->get_player(i);
 		player->paddle_input(test_mask);

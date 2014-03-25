@@ -64,22 +64,22 @@ void WaitForPlayerState::handle_events(KinectInput* input)
 
 
 	if(m_game->get_image_processor()->got_left_face() && m_game->get_image_processor()->got_right_face()){
-		#ifdef BUILD_ROBOREF
-		cv::Rect left_face = m_game->get_image_processor()->get_left_player_face_roi();
+		if(m_game->has_roboref()){
+			cv::Rect left_face = m_game->get_image_processor()->get_left_player_face_roi();
 
-		//look at left player
-		m_game->get_roboref()->look_at(cv::Point(left_face.x + left_face.width/2, left_face.y + left_face.height/2));
-		m_game->get_roboref()->speak("First player detected");
-		m_game->get_roboref()->set_pan_tilt_angles(0, 0);
+			//look at left player
+			m_game->get_roboref()->look_at(cv::Point(left_face.x + left_face.width/2, left_face.y + left_face.height/2));
+			m_game->get_roboref()->speak("First player detected");
+			m_game->get_roboref()->set_pan_tilt_angles(0, 0);
 
-		//look at right player
-		cv::Rect right_face = m_game->get_image_processor()->get_right_player_face_roi();
-		m_game->get_roboref()->look_at(cv::Point(right_face.x + right_face.width/2, right_face.y + right_face.height/2));
-		m_game->get_roboref()->speak("Second player detected");
-		m_game->get_roboref()->set_pan_tilt_angles(0, 0);
+			//look at right player
+			cv::Rect right_face = m_game->get_image_processor()->get_right_player_face_roi();
+			m_game->get_roboref()->look_at(cv::Point(right_face.x + right_face.width/2, right_face.y + right_face.height/2));
+			m_game->get_roboref()->speak("Second player detected");
+			m_game->get_roboref()->set_pan_tilt_angles(0, 0);
 
-		m_game->get_roboref()->speak("Let's play Pong");
-		#endif
+			m_game->get_roboref()->speak("Let's play Pong");
+		}
 		m_game->set_next_state(STATE_PLAY_SERVE);
 	}
 
