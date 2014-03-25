@@ -169,18 +169,25 @@ void KinectPongGame::change_state() {
 SDL_Texture* KinectPongGame::texture_from_mat(cv::Mat& image) {
 	SDL_Surface* surf;
 
-	if (image.channels() == 3) {
+	switch(image.channels()){
+	case 4:
+		surf = SDL_CreateRGBSurfaceFrom(image.data, image.cols, image.rows,
+														 32, image.cols*image.channels(),
+														 0x0000ff00,0x00ff0000,0xff000000,0x000000ff);
+		break;
+	case 3:
 		surf = SDL_CreateRGBSurfaceFrom(image.data, image.cols, image.rows,
 												 24, image.cols*image.channels(),
 												 0x0000ff,0x00ff00,0xff0000,0);
-	}
-	else {
-
+		break;
+	default:
 		surf = SDL_CreateRGBSurfaceFrom(image.data, image.cols, image.rows,
 														 8, image.cols,
 														 0,0,0,0);
 		SDL_SetSurfacePalette(surf, m_gray_palette);
+		break;
 	}
+
 	if (surf == NULL) {
 		std::cout << "failed to create surface: " << SDL_GetError() << std::endl;
 		return NULL;

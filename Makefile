@@ -8,8 +8,8 @@ LIBS = -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_objdetect -lboos
 
 TARGET =	KinectPong
 
-#DEFS = -DBUILD_ROBOREF
-DEFS = 
+DEFS = -DBUILD_ROBOREF
+#DEFS = 
 
 $(TARGET):	$(OBJS)
 	$(CXX) $(DEFS) -o $(TARGET) $(OBJS) $(LIBS)

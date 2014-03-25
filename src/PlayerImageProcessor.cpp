@@ -276,59 +276,74 @@ void PlayerImageProcessor::set_player_masks(cv::Mat depth_frame)
 	cv::Rect left_half(0, 0, depth_frame.cols/2, depth_frame.rows);
 	cv::Mat left_player_half_image(m_left_player_mask, left_half);
 	cv::Mat left_half_mask(label_image, left_half);
-	left_half_mask.copyTo(left_player_half_image);
-
 	cv::Rect right_half(depth_frame.cols/2, 0, depth_frame.cols/2, depth_frame.rows);
 	cv::Mat right_player_half_image(m_right_player_mask, right_half);
 	cv::Mat right_half_mask(label_image, right_half);
-	right_half_mask.copyTo(right_player_half_image);
 
-	select_largest(left_player_half_image, contours.size());
-	select_largest(right_player_half_image, contours.size());
+	select_largest(left_half_mask, contours.size());
+	select_largest(right_half_mask, contours.size());
+
+
+	int left_area = calc_area(left_half_mask);
+	int right_area = calc_area(right_half_mask);
+
 
 	cv::Mat strel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(11, 11), cv::Point(5, 5));
 
-	double left_min_val, left_max_val;
-	cv::Point left_min, left_max;
-	cv::minMaxLoc(float_depth, &left_min_val, &left_max_val, &left_min, &left_max, m_left_player_mask);
-	cv::Mat left_contact_threshold_float, left_contact_threshold;
-	cv::threshold(float_depth, left_contact_threshold_float, left_min_val+200, 255, CV_THRESH_BINARY_INV);
-	left_contact_threshold_float.convertTo(left_contact_threshold, CV_8UC1, 1);
-	m_left_player_contact_mask.setTo(0);
-	if((left_min.x > 0) && (left_min.y > 0)){
-		m_left_player_contact_mask.at<uchar>(left_min.y, left_min.x) = 255;
-		int left_area = calc_area(m_left_player_mask);
-		int left_contact_area = 0;
-		int old_left_contact_area = 1;
-		while((left_contact_area < left_area/10) && (old_left_contact_area != left_contact_area)){
-			old_left_contact_area = left_contact_area;
-			cv::Mat new_mask;
-			cv::dilate(m_left_player_contact_mask, new_mask, strel, cv::Point(-1, -1), 5);
-			new_mask.copyTo(m_left_player_contact_mask, left_contact_threshold.mul(m_left_player_mask));
-			left_contact_area = calc_area(m_left_player_contact_mask);
+	if(left_area > 0){
+		left_half_mask.copyTo(left_player_half_image);
+		double left_min_val, left_max_val;
+		cv::Point left_min, left_max;
+		cv::minMaxLoc(float_depth, &left_min_val, &left_max_val, &left_min, &left_max, m_left_player_mask);
+		cv::Mat left_contact_threshold_float, left_contact_threshold;
+		cv::threshold(float_depth, left_contact_threshold_float, left_min_val+200, 255, CV_THRESH_BINARY_INV);
+		left_contact_threshold_float.convertTo(left_contact_threshold, CV_8UC1, 1);
+		m_left_player_contact_mask.setTo(0);
+		if((left_min.x > 0) && (left_min.y > 0)){
+			m_left_player_contact_mask.at<uchar>(left_min.y, left_min.x) = 255;
+			int left_area = calc_area(m_left_player_mask);
+			int left_contact_area = 0;
+			int old_left_contact_area = 1;
+			while((left_contact_area < left_area/10) && (old_left_contact_area != left_contact_area)){
+				old_left_contact_area = left_contact_area;
+				cv::Mat new_mask;
+				cv::dilate(m_left_player_contact_mask, new_mask, strel, cv::Point(-1, -1), 5);
+				new_mask.copyTo(m_left_player_contact_mask, left_contact_threshold.mul(m_left_player_mask));
+				left_contact_area = calc_area(m_left_player_contact_mask);
+			}
 		}
+		//smooth outlines
+		cv::dilate(m_left_player_contact_mask, m_left_player_contact_mask, strel, cv::Point(-1, -1), 3);
+		cv::erode(m_left_player_contact_mask, m_left_player_contact_mask, strel, cv::Point(-1, -1), 3);
 	}
 
-	double right_min_val, right_max_val;
-	cv::Point right_min, right_max;
-	cv::minMaxLoc(float_depth, &right_min_val, &right_max_val, &right_min, &right_max, m_right_player_mask);
-	cv::Mat right_contact_threshold_float, right_contact_threshold;
-	cv::threshold(float_depth, right_contact_threshold_float, right_min_val+200, 255, CV_THRESH_BINARY_INV);
-	right_contact_threshold_float.convertTo(right_contact_threshold, CV_8UC1, 1);
-	m_right_player_contact_mask.setTo(0);
-	if((right_min.x > 0) && (right_min.y > 0)){
-		m_right_player_contact_mask.at<uchar>(right_min.y, right_min.x) = 255;
-		int right_area = calc_area(m_right_player_mask);
-		int right_contact_area = 0;
-		int old_right_contact_area = 1;
-		while((right_contact_area < right_area/10) && (old_right_contact_area != right_contact_area)){
-			old_right_contact_area = right_contact_area;
-			cv::Mat new_mask;
-			cv::dilate(m_right_player_contact_mask, new_mask, strel, cv::Point(-1, -1), 5);
-			new_mask.copyTo(m_right_player_contact_mask, right_contact_threshold.mul(m_right_player_mask));
-			right_contact_area = calc_area(m_right_player_contact_mask);
+	if(right_area > 0){
+		right_half_mask.copyTo(right_player_half_image);
+		double right_min_val, right_max_val;
+		cv::Point right_min, right_max;
+		cv::minMaxLoc(float_depth, &right_min_val, &right_max_val, &right_min, &right_max, m_right_player_mask);
+		cv::Mat right_contact_threshold_float, right_contact_threshold;
+		cv::threshold(float_depth, right_contact_threshold_float, right_min_val+200, 255, CV_THRESH_BINARY_INV);
+		right_contact_threshold_float.convertTo(right_contact_threshold, CV_8UC1, 1);
+		m_right_player_contact_mask.setTo(0);
+		if((right_min.x > 0) && (right_min.y > 0)){
+			m_right_player_contact_mask.at<uchar>(right_min.y, right_min.x) = 255;
+			int right_area = calc_area(m_right_player_mask);
+			int right_contact_area = 0;
+			int old_right_contact_area = 1;
+			while((right_contact_area < right_area/10) && (old_right_contact_area != right_contact_area)){
+				old_right_contact_area = right_contact_area;
+				cv::Mat new_mask;
+				cv::dilate(m_right_player_contact_mask, new_mask, strel, cv::Point(-1, -1), 5);
+				new_mask.copyTo(m_right_player_contact_mask, right_contact_threshold.mul(m_right_player_mask));
+				right_contact_area = calc_area(m_right_player_contact_mask);
+			}
 		}
+		//smooth outlines
+		cv::dilate(m_right_player_contact_mask, m_right_player_contact_mask, strel, cv::Point(-1, -1), 3);
+		cv::erode(m_right_player_contact_mask, m_right_player_contact_mask, strel, cv::Point(-1, -1), 3);
 	}
+
 }
 
 void PlayerImageProcessor::select_largest(cv::Mat& label_image, int n_regions)

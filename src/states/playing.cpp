@@ -101,13 +101,23 @@ void PlayingState::handle_events(KinectInput* kinect) {
 		m_game->get_image_processor()->get_left_player_contact_mask(left_contact_mask);
 		m_game->get_gameboard()->get_player(0)->paddle_input(left_contact_mask);
 		cv::Mat player0_mask = m_game->get_gameboard()->get_player(0)->get_paddle_mask();
-		m_player_tex[0] = m_game->texture_from_mat(player0_mask);
+		std::vector<cv::Mat> channels0;
+		for(unsigned int k=0;k<4;k++)
+			channels0.push_back(player0_mask);
+		cv::Mat texture0;
+		cv::merge(channels0, texture0);
+		m_player_tex[0] = m_game->texture_from_mat(texture0);
 
 		cv::Mat right_contact_mask;
 		m_game->get_image_processor()->get_right_player_contact_mask(right_contact_mask);
 		m_game->get_gameboard()->get_player(1)->paddle_input(right_contact_mask);
 		cv::Mat player1_mask = m_game->get_gameboard()->get_player(1)->get_paddle_mask();
-		m_player_tex[1] = m_game->texture_from_mat(player1_mask);
+		std::vector<cv::Mat> channels1;
+		for(unsigned int k=0;k<4;k++)
+			channels1.push_back(player1_mask);
+		cv::Mat texture1;
+		cv::merge(channels1, texture1);
+		m_player_tex[1] = m_game->texture_from_mat(texture1);
 	}
 
 	SDL_Event e;

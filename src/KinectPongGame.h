@@ -9,7 +9,7 @@
 #define KINECTPONGGAME_H_
 
 //temporary definition
-//#define BUILD_ROBOREF
+#define BUILD_ROBOREF
 
 #include <SDL2/SDL.h>
 #include <opencv2/core/core.hpp>
