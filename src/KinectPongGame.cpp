@@ -25,7 +25,7 @@ KinectPongGame::KinectPongGame() : m_kinect(true){
 		m_gray_palette->colors[i].b = i;
 	}
 
-	m_gameboard = new GameBoard();
+	m_gameboard = NULL;
 }
 
 KinectPongGame::~KinectPongGame() {
@@ -36,8 +36,8 @@ void KinectPongGame::run(void) {
 
 	m_next_state = STATE_NULL;
 
-	m_state_id = STATE_INTRO;
-	//m_state_id = STATE_PLAYING;
+	//m_state_id = STATE_INTRO;
+	m_state_id = STATE_PLAYING;
 
 	switch (m_state_id) {
 	case STATE_INTRO:
@@ -99,6 +99,9 @@ bool KinectPongGame::init(bool fullscreen) {
 	#ifdef BUILD_ROBOREF
 	m_roboref.connect("/dev/ttyUSB0");
 	#endif
+
+	// Create the game board
+	m_gameboard = new GameBoard(this);
 
 	return true;
 }

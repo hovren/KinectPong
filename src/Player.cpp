@@ -14,13 +14,18 @@
 
 #define BB_PADDING 16
 
-Player::Player() {
+Player::Player(GameBoard* gb) {
 	// TODO Auto-generated constructor stub
 	m_name = "Player";
+	m_paddle_tex = NULL;
+	m_gameboard = gb;
 }
 
 Player::~Player() {
 	// TODO Auto-generated destructor stub
+	if (m_paddle_tex) {
+		SDL_DestroyTexture(m_paddle_tex);
+	}
 }
 
 void Player::paddle_input(cv::Mat mask) {
@@ -72,6 +77,12 @@ void Player::paddle_input(cv::Mat mask) {
 	cv::blur(deriv[1], deriv[1], cv::Size(5,5));
 
 	cv::merge(deriv, m_paddle_gradient);
+
+	// Set new texture
+	if (m_paddle_tex) {
+		SDL_DestroyTexture(m_paddle_tex);
+	}
+	m_paddle_tex = m_gameboard->get_game()->texture_from_mat(mask_roi);
 }
 
 bool in_circle(cv::Point2f pos, cv::Point2f circle_pos, float radius) {
@@ -79,37 +90,6 @@ bool in_circle(cv::Point2f pos, cv::Point2f circle_pos, float radius) {
 	float dy = pos.y - circle_pos.y;
 	float dd = dx*dx + dy*dy;
 	return dd < (radius*radius);
-}
-
-bool Player::collision(cv::Point2f ball_pos, float ball_radius,
-		cv::Vec2f& collision_normal) {
-
-	collision_normal.val[0] = 0;
-	collision_normal.val[1] = 1;
-	int num_gradients = 0;
-	for (int i=0; i < m_paddle_contour.size(); ++i) {
-		cv::Point2f pos;
-		pos.x = m_paddle_rect.x + ((float) m_paddle_contour[i].x) / m_input_dimensions.x;
-		pos.y = m_paddle_rect.y + ((float) m_paddle_contour[i].y) / m_input_dimensions.y;
-
-		// Is the point inside the circle?
-		if (in_circle(pos, ball_pos, ball_radius)) {
-			cv::Vec2f gradient = m_paddle_gradient.at<cv::Vec2f>(m_paddle_contour[i]);
-			collision_normal.val[0] += gradient.val[0];
-			collision_normal.val[1] += gradient.val[1];
-			++num_gradients;
-		}
-	}
-
-	if (num_gradients > 0) {
-		float norm = sqrt(collision_normal.val[0]*collision_normal.val[0] + collision_normal.val[1]*collision_normal.val[1]);
-		collision_normal.val[0] /= norm;
-		collision_normal.val[1] /= norm;
-		return true;
-	}
-	else {
-		return false;
-	}
 }
 
 float line_to_point_distance(cv::Point2f p, cv::Point2f a, cv::Point2f n, float& t) {

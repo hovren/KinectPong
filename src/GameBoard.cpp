@@ -6,23 +6,36 @@
  */
 
 #include "GameBoard.h"
+#include "Player.h"
 
 #include <iostream>
 
-GameBoard::GameBoard() {
-	// TODO Auto-generated constructor stub
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+
+GameBoard::GameBoard(KinectPongGame* game) {
+	m_game = game;
+
 	for (int i=0; i < 2; ++i) {
-		m_players[i] = new Player();
+		m_players[i] = new Player(this);
 	}
 
 	m_players[0]->set_name("Player 1");
 	m_players[1]->set_name("Player 2");
 
-	m_ball_pos.x = 0.35;
+	m_ball_pos.x = 0.85;
 	m_ball_pos.y = 0.12;
-	m_ball_velocity.x = -0.8;
+	m_ball_velocity.x = -1.8;
 	m_ball_velocity.y = 0.0;
 	m_ball_radius = 0.01;
+
+	had_collision = false;
+
+	// Graphics related
+	m_ball_tex = IMG_LoadTexture(m_game->renderer(), "window_icon.png");
+	if (!m_ball_tex) {
+		std::cout << "Error: IMG_LoadTexture: " << SDL_GetError() << std::endl;
+	}
 }
 
 GameBoard::~GameBoard() {
@@ -96,31 +109,24 @@ void GameBoard::update(float dt) {
 		if (m_players[i]->collision_line(m_ball_pos, m_ball_velocity, m_ball_radius, dt, collision_normal, collision_point)) {
 			m_ball_pos = collision_point;
 			cv::Point2f reflection = reflect(normed_velocity, collision_normal);
-			//std::cout << "Collided. Input velocity (normed)" << normed_velocity << " speed="<< cv::norm(m_ball_velocity) << " dot=" << reflection.dot(normed_velocity) << " collision normal " << collision_normal <<  " reflection " << reflection << std::endl;
+			std::cout << "Collided. Input velocity (normed)" << normed_velocity << " speed="<< cv::norm(m_ball_velocity) << " dot=" << reflection.dot(normed_velocity) << " collision normal " << collision_normal <<  " reflection " << reflection << std::endl;
 			m_ball_velocity = cv::norm(m_ball_velocity) * reflection;
-			//std::cout << "New velocity " << m_ball_velocity << std::endl;
+			std::cout << "New velocity " << m_ball_velocity << std::endl;
 			had_collision = true;
 		}
-#if 0
-		if (m_players[i]->collision(m_ball_pos, m_ball_radius, collision_normal)) {
-			cv::Point2f r;
-			float dn = m_ball_velocity.x * collision_normal.val[0] + m_ball_velocity.y * collision_normal.val[1];
-			r.x = m_ball_velocity.x - 2 * dn * collision_normal.val[0];
-			r.y = m_ball_velocity.y - 2 * dn * collision_normal.val[1];
-			// Make sure reflection is opposite to incoming
-			if ((r.x*m_ball_velocity.x + r.y * m_ball_velocity.y) > 0) {
-				r.x = -r.x;
-				r.y = -r.y;
-			}
-			m_ball_pos = old_pos;
-			m_ball_velocity.x = r.x; //0.2 * collision_normal.val[0];
-			m_ball_velocity.y = r.y; //0.2 * collision_normal.val[1];
-			//std::cout << "Input direction " << m_ball_velocity.x << ", " << m_ball_velocity.y << std::endl;
-			//std::cout << "Surface normal " << collision_normal.val[0] << ", " << collision_normal.val[1] << std::endl;
-			//std::cout << "New velocity " << m_ball_velocity.x << ", " << m_ball_velocity.y << std::endl;
-			had_collision = true;
-			break; // No need to check other player
-		}
-#endif
 	}
+}
+
+cv::Point2f GameBoard::game2screen(cv::Point2f gp) {
+	cv::Point2f sp;
+	sp.x = m_game_screen_pos.x + m_game_screen_dims.x * gp.x;
+	sp.y = m_game_screen_pos.y + m_game_screen_dims.y * gp.y;
+	return sp;
+}
+
+cv::Point2f GameBoard::screen2game(cv::Point2f sp) {
+	cv::Point2f gp;
+	gp.x = (sp.x - m_game_screen_pos.x) / m_game_screen_dims.x;
+	gp.y = (sp.y - m_game_screen_pos.y) / m_game_screen_dims.y;
+	return gp;
 }

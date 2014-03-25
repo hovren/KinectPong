@@ -9,12 +9,11 @@
 #define KINECTPONGGAME_H_
 
 //temporary definition
-#define BUILD_ROBOREF
+//#define BUILD_ROBOREF
 
 #include <SDL2/SDL.h>
 #include <opencv2/core/core.hpp>
 #include "KinectInput.h"
-#include "GameBoard.h"
 #include "PlayerImageProcessor.h"
 
 //build with or without RoboRef support
@@ -24,6 +23,7 @@
 //#include "states/GameStates.h"
 
 class GameState;
+class GameBoard;
 
 class KinectPongGame {
 public:

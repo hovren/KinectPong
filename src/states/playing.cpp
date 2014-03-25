@@ -6,7 +6,7 @@
  */
 
 #include "GameStates.h"
-
+#include "../Player.h"
 #include <iostream>
 #include <algorithm>
 #include <vector>
@@ -63,30 +63,27 @@ PlayingState::PlayingState(KinectPongGame* game) {
 	std::cout << "Run constructor" << std::endl;
 	m_game = game;
 //	m_ball_tex = create_ball_texture(m_game->norm2pixel_x(m_ball_radius), m_game->renderer());
-	m_ball_tex = IMG_LoadTexture(m_game->renderer(), "window_icon.png");
+
 	//cv::Mat test_mask; //(cv::Size(640, 480), CV_8U);
 
 	cv::Mat test_mask = cv::Mat::zeros(cv::Size(640, 480), CV_8U);
 	cv::circle(test_mask, cv::Point(100, 70), 50, cv::Scalar(255), -1);
 	cv::rectangle(test_mask, cv::Point(100, 20), cv::Point(350, 450), cv::Scalar(0), -1);
-	cv::Mat rot_mat = cv::getRotationMatrix2D(cv::Point2f(100, 70), 20.0, 1.0);
+	cv::Mat rot_mat = cv::getRotationMatrix2D(cv::Point2f(100, 70), 30.0, 1.0);
 	cv::warpAffine(test_mask, test_mask, rot_mat, test_mask.size());
 	for (int i=0; i < 2; ++i) {
 		Player* player = m_game->get_gameboard()->get_player(i);
 		player->paddle_input(test_mask);
 		cv::Mat mask = player->get_paddle_mask();
-		m_player_tex[i] = m_game->texture_from_mat(mask);
 	}
 	m_last_tick = 0;
 }
 
 PlayingState::~PlayingState() {
 	// Do nothing
-	SDL_DestroyTexture(m_ball_tex);
 }
 
 void PlayingState::handle_events(KinectInput* kinect) {
-
 	cv::Mat depth, rgb;
 	if (m_game->get_kinect()->poll_data(rgb, depth)) {
 		m_game->get_image_processor()->set_player_masks(depth);
@@ -147,7 +144,7 @@ void PlayingState::render() {
 	// Render paddle
 	for (int i=0; i < 2; ++i) {
 		Player* player = gameboard->get_player(i);
-		SDL_Texture* paddle_tex = m_player_tex[i];
+		SDL_Texture* paddle_tex = m_game->get_gameboard()->get_player(i)->get_paddle_texture();
 		if (paddle_tex) {
 			SDL_Rect paddle_rect;
 			//cv::Point2f paddle_pos(m_player_data[player].paddle_x, m_player_data[player].paddle_y);
@@ -168,14 +165,17 @@ void PlayingState::render() {
 	ball_rect.y = m_game->norm2pixel_y(ball_pos.y - ball_radius);
 	ball_rect.h = ball_rect.w = m_game->norm2pixel_x(2*ball_radius);
 	//std::cout << "Ball Pos: " << ball_rect.x << ", " << ball_rect.y << " dim " << ball_rect.w << ", " << ball_rect.h << std::endl;
-	SDL_RenderCopy(renderer, m_ball_tex, NULL, &ball_rect);
+	std::cout << "Render ball at " << ball_rect.x << ", " << ball_rect.y << " " << ball_rect.w << " x " << ball_rect.h << std::endl;
+	SDL_Texture* ball_tex = m_game->get_gameboard()->get_ball_texture();
+	std::cout << "Ball texture " << ball_tex << std::endl;
+	SDL_RenderCopy(renderer, ball_tex, NULL, &ball_rect);
 
 	// Render game board
 	cv::Point2f gb0(0.0, 0.0);
 	cv::Point2f gbdim(1.0, 1.0);
 	SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255); // yellow
-	cv::Point2f gb0_s = game2screen(gb0);
-	cv::Point2f gbdim_s = game2screen(gbdim);
+	cv::Point2f gb0_s = m_game->get_gameboard()->game2screen(gb0);
+	cv::Point2f gbdim_s = m_game->get_gameboard()->game2screen(gbdim);
 	SDL_RenderDrawLine(renderer, m_game->norm2pixel_x(gb0_s.x), m_game->norm2pixel_y(gb0_s.y), m_game->norm2pixel_x(gbdim_s.x), m_game->norm2pixel_y(gb0_s.y));
 	SDL_RenderDrawLine(renderer, m_game->norm2pixel_x(gb0_s.x), m_game->norm2pixel_y(gb0_s.y), m_game->norm2pixel_x(gb0_s.x), m_game->norm2pixel_y(gbdim_s.y));
 	SDL_RenderDrawLine(renderer, m_game->norm2pixel_x(gbdim_s.x), m_game->norm2pixel_y(gb0_s.y), m_game->norm2pixel_x(gbdim_s.x), m_game->norm2pixel_y(gbdim_s.y));
@@ -184,18 +184,4 @@ void PlayingState::render() {
 	// Present and delay
 	SDL_RenderPresent(renderer);
 	SDL_Delay(10);
-}
-
-cv::Point2f PlayingState::game2screen(cv::Point2f gp) {
-	cv::Point2f sp;
-	sp.x = m_game_screen_pos.x + m_game_screen_dims.x * gp.x;
-	sp.y = m_game_screen_pos.y + m_game_screen_dims.y * gp.y;
-	return sp;
-}
-
-cv::Point2f PlayingState::screen2game(cv::Point2f sp) {
-	cv::Point2f gp;
-	gp.x = (sp.x - m_game_screen_pos.x) / m_game_screen_dims.x;
-	gp.y = (sp.y - m_game_screen_pos.y) / m_game_screen_dims.y;
-	return gp;
 }
