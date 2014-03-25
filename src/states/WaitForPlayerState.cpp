@@ -28,6 +28,9 @@ void WaitForPlayerState::handle_events(KinectInput* input)
 	std::cout << "Waiting for players..." << std::endl;
 	cv::Mat depth, rgb;
 	if (m_game->get_kinect()->poll_data(rgb, depth)) {
+		cv::flip(rgb, rgb, 1);
+		cv::flip(depth, depth, 1);
+
 		m_game->get_image_processor()->set_player_masks(depth);
 		m_game->get_image_processor()->find_player_faces(rgb, depth);
 		SDL_DestroyTexture(m_rgb_tex);

@@ -28,7 +28,10 @@ void Player::paddle_input(cv::Mat mask) {
 	mask.copyTo(mask_for_contours);
 	cv::findContours(mask_for_contours, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE, cv::Point(0,0));
 	//std::cout << "Found " << contours.size() << " contours for player " << player << std::endl;
-	cv::Rect bb = cv::boundingRect(contours[0]);
+	cv::Rect bb(0, 0, 1, 1);
+	if(contours.size() > 0)
+		bb = cv::boundingRect(contours[0]);
+
 	cv::Mat mask_roi = mask(bb).clone();
 	m_input_dimensions.x = mask.cols;
 	m_input_dimensions.y = mask.rows;
@@ -37,9 +40,19 @@ void Player::paddle_input(cv::Mat mask) {
 	m_paddle_rect.width = ((float) bb.width) / mask.cols;
 	m_paddle_rect.height = ((float) bb.height) / mask.rows;
 
-	// Update the paddle contours coordinates to lie within bounding box
+	// clear previous contours
 	m_paddle_contour.clear();
-	for (int i=0; i < contours[0].size(); ++i) {
+
+	if(contours.size() == 0){
+		//set mask and gradients to zero and return
+		cv::Mat empty_gradient = cv::Mat::zeros(mask.rows, mask.cols, CV_32FC2);
+		empty_gradient.copyTo(m_paddle_gradient);
+		mask_roi.copyTo(m_paddle_mask);
+		return;
+	}
+
+	// Update the paddle contours coordinates to lie within bounding box
+	for (unsigned int i=0; i < contours[0].size(); ++i) {
 		cv::Point contour_point_updated;
 		contour_point_updated.x = contours[0][i].x - bb.x;
 		contour_point_updated.y = contours[0][i].y - bb.y;
@@ -75,7 +88,8 @@ bool Player::collision(cv::Point2f ball_pos, float ball_radius,
 	collision_normal.val[0] = 0;
 	collision_normal.val[1] = 1;
 	int num_gradients = 0;
-	for (int i=0; i < m_paddle_contour.size(); ++i) {
+
+	for (unsigned int i=0; i < m_paddle_contour.size(); ++i) {
 		cv::Point2f pos;
 		pos.x = m_paddle_rect.x + ((float) m_paddle_contour[i].x) / m_input_dimensions.x;
 		pos.y = m_paddle_rect.y + ((float) m_paddle_contour[i].y) / m_input_dimensions.y;

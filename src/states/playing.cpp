@@ -67,10 +67,10 @@ PlayingState::PlayingState(KinectPongGame* game) {
 	//cv::Mat test_mask; //(cv::Size(640, 480), CV_8U);
 
 	cv::Mat test_mask = cv::Mat::zeros(cv::Size(640, 480), CV_8U);
-	cv::circle(test_mask, cv::Point(100, 70), 50, cv::Scalar(255), -1);
-	cv::rectangle(test_mask, cv::Point(100, 20), cv::Point(350, 450), cv::Scalar(0), -1);
-	cv::Mat rot_mat = cv::getRotationMatrix2D(cv::Point2f(100, 70), 120.0, 1.0);
-	cv::warpAffine(test_mask, test_mask, rot_mat, test_mask.size());
+	//cv::circle(test_mask, cv::Point(100, 70), 50, cv::Scalar(255), -1);
+	//cv::rectangle(test_mask, cv::Point(100, 20), cv::Point(350, 450), cv::Scalar(0), -1);
+	//cv::Mat rot_mat = cv::getRotationMatrix2D(cv::Point2f(100, 70), 120.0, 1.0);
+	//cv::warpAffine(test_mask, test_mask, rot_mat, test_mask.size());
 	for (int i=0; i < 2; ++i) {
 		Player* player = m_game->get_gameboard()->get_player(i);
 		player->paddle_input(test_mask);
@@ -89,18 +89,25 @@ void PlayingState::handle_events(KinectInput* kinect) {
 
 	cv::Mat depth, rgb;
 	if (m_game->get_kinect()->poll_data(rgb, depth)) {
+		cv::flip(rgb, rgb, 1);
+		cv::flip(depth, depth, 1);
+
 		m_game->get_image_processor()->set_player_masks(depth);
+
+		//face detector is too slow to run in this loop
 	    //m_game->get_image_processor()->find_player_faces(rgb, depth);
 
 		cv::Mat left_contact_mask;
 		m_game->get_image_processor()->get_left_player_contact_mask(left_contact_mask);
-		//m_game->get_gameboard()->get_player(0)->paddle_input(left_contact_mask);
-		//m_player_tex[0] = m_game->texture_from_mat(left_contact_mask);
+		m_game->get_gameboard()->get_player(0)->paddle_input(left_contact_mask);
+		cv::Mat player0_mask = m_game->get_gameboard()->get_player(0)->get_paddle_mask();
+		m_player_tex[0] = m_game->texture_from_mat(player0_mask);
 
 		cv::Mat right_contact_mask;
 		m_game->get_image_processor()->get_right_player_contact_mask(right_contact_mask);
-		//m_game->get_gameboard()->get_player(1)->paddle_input(right_contact_mask);
-		//m_player_tex[1] = m_game->texture_from_mat(right_contact_mask);
+		m_game->get_gameboard()->get_player(1)->paddle_input(right_contact_mask);
+		cv::Mat player1_mask = m_game->get_gameboard()->get_player(1)->get_paddle_mask();
+		m_player_tex[1] = m_game->texture_from_mat(player1_mask);
 	}
 
 	SDL_Event e;

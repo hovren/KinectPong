@@ -24,6 +24,9 @@ KinectViewState::~KinectViewState() {
 void KinectViewState::handle_events(KinectInput* kinect) {
 	cv::Mat depth, rgb;
 	if (kinect->poll_data(rgb, depth)) {
+		cv::flip(rgb, rgb, 1);
+		cv::flip(depth, depth, 1);
+
 		//std::cout << "New frame at time " << SDL_GetTicks() / 1000.0 << std::endl;
 		SDL_DestroyTexture(m_rgb_tex);
 		SDL_DestroyTexture(m_depth_tex);

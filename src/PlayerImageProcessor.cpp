@@ -329,8 +329,6 @@ void PlayerImageProcessor::set_player_masks(cv::Mat depth_frame)
 			right_contact_area = calc_area(m_right_player_contact_mask);
 		}
 	}
-
-
 }
 
 void PlayerImageProcessor::select_largest(cv::Mat& label_image, int n_regions)

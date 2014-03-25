@@ -94,6 +94,8 @@ bool KinectPongGame::init(bool fullscreen) {
 
 	//Initialise feace detector
 	m_image_processor.init_detector("/usr/share/OpenCV/haarcascades");
+	m_image_processor.set_near_limit(600);
+	m_image_processor.set_far_limit(2000);
 
 	//Initialise RoboRef if present
 	#ifdef BUILD_ROBOREF

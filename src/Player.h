@@ -21,7 +21,7 @@ public:
 
 	void set_name(std::string name) { m_name = name; };
 	cv::Rect_<float> get_paddle_rect() { return m_paddle_rect; }
-	cv::Mat get_paddle_mask() { return m_paddle_mask; };
+	cv::Mat get_paddle_mask() { return m_paddle_mask; }
 private:
 	std::string m_name;
 	cv::Rect_<float> m_paddle_rect;
