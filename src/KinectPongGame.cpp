@@ -201,7 +201,7 @@ void KinectPongGame::change_state() {
 	}
 }
 
-SDL_Texture* KinectPongGame::texture_from_mat(cv::Mat& image) {
+SDL_Surface* KinectPongGame::surface_from_mat(cv::Mat& image) {
 	SDL_Surface* surf;
 
 	switch(image.channels()){
@@ -222,14 +222,19 @@ SDL_Texture* KinectPongGame::texture_from_mat(cv::Mat& image) {
 		SDL_SetSurfacePalette(surf, m_gray_palette);
 		break;
 	}
+	return surf;
+}
 
-	if (surf == NULL) {
-		std::cout << "failed to create surface: " << SDL_GetError() << std::endl;
+
+SDL_Texture* KinectPongGame::texture_from_mat(cv::Mat& image) {
+	SDL_Surface* surf = surface_from_mat(image);
+	if (!surf) {
+		std::cout << "Error, failed to create surface: " << SDL_GetError() << std::endl;
 		return NULL;
 	}
 	SDL_Texture* tex = SDL_CreateTextureFromSurface(m_renderer, surf);
 	if (tex == NULL) {
-			std::cout << "failed to create texture: " << SDL_GetError() << std::endl;
+			std::cout << "Failed to create texture: " << SDL_GetError() << std::endl;
 	}
 	SDL_FreeSurface(surf);
 	return tex;
