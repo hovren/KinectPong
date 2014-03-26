@@ -14,7 +14,9 @@
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_image.h>
 
-GameBoard::GameBoard(KinectPongGame* game) : m_max_score(1) {
+#define GAMEBOARD_MAX_SCORE 5
+
+GameBoard::GameBoard(KinectPongGame* game) : m_max_score(GAMEBOARD_MAX_SCORE) {
 	m_game = game;
 
 	for (int i = 0; i < 2; ++i) {

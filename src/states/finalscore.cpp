@@ -138,7 +138,7 @@ void FinalScoreState::render() {
 
 	int w, h;
 	for (int i=0; i < 2; ++i) {
-		float midx = 0.25 + 0.5*i;
+		float midx = 0.75 - 0.5*i;
 		// Face
 		SDL_Rect face_rect;
 		w = m_player_faces[i].w;
