@@ -35,7 +35,7 @@ ServePlayState::~ServePlayState() {
 }
 
 void ServePlayState::handle_events(KinectInput* kinect) {
-
+	default_event_handler();
 }
 
 void ServePlayState::handle_logic() {

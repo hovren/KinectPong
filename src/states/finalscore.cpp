@@ -88,8 +88,14 @@ void FinalScoreState::handle_events(KinectInput* kinect) {
 			m_game->set_next_state(STATE_EXIT);
 			break;
 		case SDL_KEYDOWN:
-			std::cout << "Game over, moving to reset state" << std::endl;
-			m_game->set_next_state(STATE_RESET);
+			if (e.key.keysym.sym == SDLK_ESCAPE) {
+				std::cout << "Game over, ESC pressed, exiting" << std::endl;
+				m_game->set_next_state(STATE_EXIT);
+			}
+			else {
+				std::cout << "Game over, moving to reset state" << std::endl;
+				m_game->set_next_state(STATE_RESET);
+			}
 			break;
 		}
 	} // end SDL_PollEvent

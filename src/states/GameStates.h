@@ -16,16 +16,6 @@
 #include "../GameBoard.h"
 //class KinectPongGame; // Forward declare this
 
-class GameState {
-public:
-	virtual void handle_events(KinectInput* kinect_input) = 0;
-	virtual void handle_logic() = 0;
-	virtual void render() = 0;
-	virtual ~GameState(){};
-protected:
-	KinectPongGame* m_game;
-};
-
 enum GameStates {
 	STATE_NULL,
 	STATE_INTRO,
@@ -37,6 +27,32 @@ enum GameStates {
 	STATE_PLAYING,
 	STATE_FINAL_SCORE,
 	STATE_EXIT
+};
+
+class GameState {
+public:
+	virtual void handle_events(KinectInput* kinect_input) = 0;
+	virtual void handle_logic() = 0;
+	virtual void render() = 0;
+	virtual ~GameState() {}
+protected:
+	KinectPongGame* m_game;
+	void default_event_handler() {
+		SDL_Event e;
+		while (SDL_PollEvent(&e)) {
+			switch (e.type) {
+			case SDL_QUIT:
+				m_game->set_next_state(STATE_EXIT);
+				break;
+			case SDL_KEYDOWN:
+				if (e.key.keysym.sym == SDLK_ESCAPE) {
+					std::cout << "Escape pressed" << std::endl;
+					m_game->set_next_state(STATE_EXIT);
+				}
+				break;
+			}
+		} // end SDL_PollEvent
+	}
 };
 
 //----------------------------------

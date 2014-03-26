@@ -77,7 +77,7 @@ PlayerScoredState::~PlayerScoredState() {
 }
 
 void PlayerScoredState::handle_events(KinectInput* kinect) {
-
+	default_event_handler();
 }
 
 void PlayerScoredState::handle_logic() {
