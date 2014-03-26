@@ -17,17 +17,22 @@ PanTiltInterface::PanTiltInterface() {
 	m_max_tilt_ticks = 0;
 	m_pan_resolution = 0;
 	m_tilt_resolution = 0;
+	m_connected = false;
 }
 
 PanTiltInterface::~PanTiltInterface() {
-	write_command("PP0\n");
-	write_command("TP0\n");
+	if (m_connected) {
+		write_command("PP0\n");
+		write_command("TP0\n");
 
-	m_port->close();
-	m_io_service->stop();
+		m_port->close();
+		m_io_service->stop();
+	}
 
-	delete m_port;
-	delete m_io_service;
+	if (m_port)
+		delete m_port;
+	if (m_io_service)
+		delete m_io_service;
 }
 
 void PanTiltInterface::connect(std::string portname)
@@ -89,6 +94,8 @@ void PanTiltInterface::connect(std::string portname)
 	std::cout << "Pan: " << m_min_pan_ticks << ":" << m_max_pan_ticks << ", resolution: " << m_pan_resolution << std::endl;
 	std::cout << "Tilt: " << m_min_tilt_ticks << ":" << m_max_tilt_ticks  << ", resolution: " << m_tilt_resolution << std::endl;
 
+	// Mark as connected
+	m_connected = true;
 }
 
 

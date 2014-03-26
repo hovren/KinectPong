@@ -47,7 +47,7 @@ private:
 	int 						m_max_tilt_ticks;
 	double 						m_pan_resolution;
 	double 						m_tilt_resolution;
-
+	bool						m_connected;
 };
 
 #endif /* PANTILTINTERFACE_H_ */
