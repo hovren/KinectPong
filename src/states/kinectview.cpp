@@ -68,7 +68,7 @@ void KinectViewState::handle_events(KinectInput* kinect) {
 			if(e.key.keysym.sym == SDLK_ESCAPE)
 				m_game->set_next_state(STATE_EXIT);
 			else
-				m_game->set_next_state(STATE_PLAY_SERVE);
+				m_game->set_next_state(STATE_WAITFORPLAYERS);
 			break;
 		}
 	} // end SDL_PollEvent
