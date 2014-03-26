@@ -45,12 +45,12 @@ void Player::paddle_input(cv::Mat mask) {
 	if(contours.size() > 0)
 		bb = cv::boundingRect(contours[0]);
 
-	std::cout << "bb was " << bb << std::endl;
+	//std::cout << "bb was " << bb << std::endl;
 	bb.x = std::max<int>(0, bb.x - BB_PADDING);
 	bb.y = std::max<int>(0, bb.y - BB_PADDING);
 	bb.width = bb.x + bb.width + 2*BB_PADDING > mask.cols ? mask.cols - bb.x : bb.width + 2*BB_PADDING;
 	bb.height = bb.y + bb.height + 2*BB_PADDING > mask.rows ? mask.rows - bb.y : bb.height + 2*BB_PADDING;
-	std::cout << "bb is " << bb << std::endl;
+	//std::cout << "bb is " << bb << std::endl;
 	cv::Mat mask_roi = mask(bb).clone();
 	m_input_dimensions.x = mask.cols;
 	m_input_dimensions.y = mask.rows;
@@ -79,9 +79,9 @@ void Player::paddle_input(cv::Mat mask) {
 		m_paddle_contour.push_back(contour_point_updated);
 	}
 
-	std::cout << "Found bounding box at " << bb.x << ", " << bb.y << " dim " << bb.width << " x " << bb.height;
-	std::cout << " of image size " << mask.cols << ", " << mask.rows << std::endl;
-	std::cout << "Player paddle set at " << m_paddle_rect.x << ", " << m_paddle_rect.y << std::endl;
+//	std::cout << "Found bounding box at " << bb.x << ", " << bb.y << " dim " << bb.width << " x " << bb.height;
+//	std::cout << " of image size " << mask.cols << ", " << mask.rows << std::endl;
+//	std::cout << "Player paddle set at " << m_paddle_rect.x << ", " << m_paddle_rect.y << std::endl;
 	mask_roi.copyTo(m_paddle_mask); // = mask_roi;
 
 	// Filter the mask to find the normals
@@ -121,12 +121,12 @@ void Player::player_input(cv::Mat mask) {
 	if(contours.size() > 0)
 		bb = cv::boundingRect(contours[0]);
 
-	std::cout << "bb was " << bb << std::endl;
+	//std::cout << "bb was " << bb << std::endl;
 	bb.x = std::max<int>(0, bb.x - BB_PADDING);
 	bb.y = std::max<int>(0, bb.y - BB_PADDING);
 	bb.width = bb.x + bb.width + 2*BB_PADDING > mask.cols ? mask.cols - bb.x : bb.width + 2*BB_PADDING;
 	bb.height = bb.y + bb.height + 2*BB_PADDING > mask.rows ? mask.rows - bb.y : bb.height + 2*BB_PADDING;
-	std::cout << "bb is " << bb << std::endl;
+	//std::cout << "bb is " << bb << std::endl;
 	cv::Mat mask_roi = mask(bb).clone();
 	m_player_dimensions.x = mask.cols;
 	m_player_dimensions.y = mask.rows;
