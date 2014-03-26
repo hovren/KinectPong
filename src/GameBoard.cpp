@@ -159,7 +159,7 @@ void GameBoard::render_board_background() {
 	SDL_Renderer* renderer = m_game->renderer();
 
 	// Background color
-	SDL_SetRenderDrawColor(renderer, 60, 60, 80, 255);
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 	SDL_RenderClear(renderer);
 
 	// Draw middle line
