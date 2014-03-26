@@ -342,54 +342,62 @@ void PlayerImageProcessor::set_player_masks(cv::Mat depth_frame)
 		left_half_mask.copyTo(left_player_half_image);
 		double left_min_val, left_max_val;
 		cv::Point left_min, left_max;
-		cv::minMaxLoc(float_depth, &left_min_val, &left_max_val, &left_min, &left_max, m_left_player_mask);
+		cv::Mat left_depth(float_depth, left_half);
+		cv::Mat left_contact_half(m_left_player_contact_mask, left_half);
+
+		cv::minMaxLoc(left_depth, &left_min_val, &left_max_val, &left_min, &left_max, left_player_half_image);
 		cv::Mat left_contact_threshold_float, left_contact_threshold;
-		cv::threshold(float_depth, left_contact_threshold_float, left_min_val+200, 255, CV_THRESH_BINARY_INV);
+		cv::threshold(left_depth, left_contact_threshold_float, left_min_val+200, 255, CV_THRESH_BINARY_INV);
 		left_contact_threshold_float.convertTo(left_contact_threshold, CV_8UC1, 1);
-		m_left_player_contact_mask.setTo(0);
+		left_contact_half.setTo(0);
+
 		if((left_min.x > 0) && (left_min.y > 0)){
-			m_left_player_contact_mask.at<uchar>(left_min.y, left_min.x) = 255;
-			int left_area = calc_area(m_left_player_mask);
+			left_contact_half.at<uchar>(left_min.y, left_min.x) = 255;
+			int left_area = calc_area(left_player_half_image);
 			int left_contact_area = 0;
 			int old_left_contact_area = 1;
 			while((left_contact_area < left_area/10) && (old_left_contact_area != left_contact_area)){
 				old_left_contact_area = left_contact_area;
 				cv::Mat new_mask;
-				cv::dilate(m_left_player_contact_mask, new_mask, strel, cv::Point(-1, -1), 5);
-				new_mask.copyTo(m_left_player_contact_mask, left_contact_threshold.mul(m_left_player_mask));
-				left_contact_area = calc_area(m_left_player_contact_mask);
+				cv::dilate(left_contact_half, new_mask, strel, cv::Point(-1, -1), 5);
+				new_mask.copyTo(left_contact_half, left_contact_threshold.mul(left_player_half_image));
+				left_contact_area = calc_area(left_contact_half);
 			}
 		}
 		//smooth outlines
-		cv::dilate(m_left_player_contact_mask, m_left_player_contact_mask, strel, cv::Point(-1, -1), 3);
-		cv::erode(m_left_player_contact_mask, m_left_player_contact_mask, strel, cv::Point(-1, -1), 3);
+		cv::dilate(left_contact_half, left_contact_half, strel, cv::Point(-1, -1), 3);
+		cv::erode(left_contact_half, left_contact_half, strel, cv::Point(-1, -1), 3);
 	}
 
 	if(right_area > 0){
 		right_half_mask.copyTo(right_player_half_image);
 		double right_min_val, right_max_val;
 		cv::Point right_min, right_max;
-		cv::minMaxLoc(float_depth, &right_min_val, &right_max_val, &right_min, &right_max, m_right_player_mask);
+		cv::Mat right_depth(float_depth, right_half);
+		cv::Mat right_contact_half(m_right_player_contact_mask, right_half);
+
+		cv::minMaxLoc(right_depth, &right_min_val, &right_max_val, &right_min, &right_max, right_player_half_image);
 		cv::Mat right_contact_threshold_float, right_contact_threshold;
-		cv::threshold(float_depth, right_contact_threshold_float, right_min_val+200, 255, CV_THRESH_BINARY_INV);
+		cv::threshold(right_depth, right_contact_threshold_float, right_min_val+200, 255, CV_THRESH_BINARY_INV);
 		right_contact_threshold_float.convertTo(right_contact_threshold, CV_8UC1, 1);
-		m_right_player_contact_mask.setTo(0);
+		right_contact_half.setTo(0);
+
 		if((right_min.x > 0) && (right_min.y > 0)){
-			m_right_player_contact_mask.at<uchar>(right_min.y, right_min.x) = 255;
-			int right_area = calc_area(m_right_player_mask);
+			right_contact_half.at<uchar>(right_min.y, right_min.x) = 255;
+			int right_area = calc_area(right_player_half_image);
 			int right_contact_area = 0;
 			int old_right_contact_area = 1;
 			while((right_contact_area < right_area/10) && (old_right_contact_area != right_contact_area)){
 				old_right_contact_area = right_contact_area;
 				cv::Mat new_mask;
-				cv::dilate(m_right_player_contact_mask, new_mask, strel, cv::Point(-1, -1), 5);
-				new_mask.copyTo(m_right_player_contact_mask, right_contact_threshold.mul(m_right_player_mask));
-				right_contact_area = calc_area(m_right_player_contact_mask);
+				cv::dilate(right_contact_half, new_mask, strel, cv::Point(-1, -1), 5);
+				new_mask.copyTo(right_contact_half, right_contact_threshold.mul(right_player_half_image));
+				right_contact_area = calc_area(right_contact_half);
 			}
 		}
 		//smooth outlines
-		cv::dilate(m_right_player_contact_mask, m_right_player_contact_mask, strel, cv::Point(-1, -1), 3);
-		cv::erode(m_right_player_contact_mask, m_right_player_contact_mask, strel, cv::Point(-1, -1), 3);
+		cv::dilate(right_contact_half, right_contact_half, strel, cv::Point(-1, -1), 3);
+		cv::erode(right_contact_half, right_contact_half, strel, cv::Point(-1, -1), 3);
 	}
 
 }
