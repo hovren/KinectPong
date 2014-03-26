@@ -124,6 +124,7 @@ public:
 private:
 	SDL_Texture* m_rgb_tex;
 	SDL_Texture* m_depth_tex;
+	bool m_first_run;
 
 };
 

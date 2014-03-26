@@ -18,6 +18,7 @@ Player::Player(GameBoard* gb) {
 	// TODO Auto-generated constructor stub
 	m_name = "Player";
 	m_paddle_tex = NULL;
+	m_player_tex = NULL;
 	m_gameboard = gb;
 	m_score = 0;
 }
@@ -26,6 +27,9 @@ Player::~Player() {
 	// TODO Auto-generated destructor stub
 	if (m_paddle_tex) {
 		SDL_DestroyTexture(m_paddle_tex);
+	}
+	if(m_player_tex){
+		SDL_DestroyTexture(m_player_tex);
 	}
 }
 
@@ -103,6 +107,54 @@ void Player::paddle_input(cv::Mat mask) {
 	cv::Mat argb_texture_mat;
 	cv::merge(channels0, argb_texture_mat);
 	m_paddle_tex = m_gameboard->get_game()->texture_from_mat(argb_texture_mat);
+}
+
+void Player::player_input(cv::Mat mask) {
+	// Construct texture
+	std::vector< std::vector<cv::Point> > contours;
+	std::vector<cv::Vec4i> hierarchy;
+	cv::Mat mask_for_contours;
+	mask.copyTo(mask_for_contours);
+	cv::findContours(mask_for_contours, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE, cv::Point(0,0));
+	//std::cout << "Found " << contours.size() << " contours for player " << player << std::endl;
+	cv::Rect bb(0, 0, 1, 1);
+	if(contours.size() > 0)
+		bb = cv::boundingRect(contours[0]);
+
+	std::cout << "bb was " << bb << std::endl;
+	bb.x = std::max<int>(0, bb.x - BB_PADDING);
+	bb.y = std::max<int>(0, bb.y - BB_PADDING);
+	bb.width = bb.x + bb.width + 2*BB_PADDING > mask.cols ? mask.cols - bb.x : bb.width + 2*BB_PADDING;
+	bb.height = bb.y + bb.height + 2*BB_PADDING > mask.rows ? mask.rows - bb.y : bb.height + 2*BB_PADDING;
+	std::cout << "bb is " << bb << std::endl;
+	cv::Mat mask_roi = mask(bb).clone();
+	m_player_dimensions.x = mask.cols;
+	m_player_dimensions.y = mask.rows;
+	m_player_rect.x = ((float) bb.x) / mask.cols;
+	m_player_rect.y = ((float) bb.y) / mask.rows;
+	m_player_rect.width = ((float) bb.width) / mask.cols;
+	m_player_rect.height = ((float) bb.height) / mask.rows;
+
+	mask_roi.copyTo(m_player_mask);
+
+	if(contours.size() == 0){
+		return;
+	}
+
+	// Set new texture
+	if (m_player_tex) {
+		SDL_DestroyTexture(m_player_tex);
+	}
+	std::vector<cv::Mat> channels0;
+	for(unsigned int k=0;k<4;k++) {
+		if((k==0) || (k==2))
+			channels0.push_back(mask_roi);
+		else
+			channels0.push_back(cv::Mat::zeros(mask_roi.rows, mask_roi.cols, CV_8UC1));
+	}
+	cv::Mat rgba_texture_mat;
+	cv::merge(channels0, rgba_texture_mat);
+	m_player_tex = m_gameboard->get_game()->texture_from_mat(rgba_texture_mat);
 }
 
 bool in_circle(cv::Point2f pos, cv::Point2f circle_pos, float radius) {

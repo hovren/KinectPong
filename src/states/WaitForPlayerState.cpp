@@ -16,6 +16,7 @@ WaitForPlayerState::WaitForPlayerState(KinectPongGame* game) {
 	m_game = game;
 	m_rgb_tex = NULL;
 	m_depth_tex = NULL;
+	m_first_run = true;
 
 }
 
@@ -25,6 +26,12 @@ WaitForPlayerState::~WaitForPlayerState() {
 
 void WaitForPlayerState::handle_events(KinectInput* input)
 {
+	if(m_first_run){
+		if(m_game->has_roboref()){
+			m_game->get_roboref()->speak("Waiting for players");
+		}
+		m_first_run = false;
+	}
 	std::cout << "Waiting for players..." << std::endl;
 	cv::Mat depth, rgb;
 	if (m_game->get_kinect()->poll_data(rgb, depth)) {

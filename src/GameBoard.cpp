@@ -179,6 +179,23 @@ void GameBoard::render_board_all() {
 	// Render paddle
 	for (int i=0; i < 2; ++i) {
 		Player* player = get_player(i);
+
+		// Render player silhouettes
+		SDL_Texture* player_tex = player->get_player_texture();
+		if (player_tex) {
+			SDL_Rect player_rect;
+			//cv::Point2f paddle_pos(m_player_data[player].paddle_x, m_player_data[player].paddle_y);
+			cv::Rect_<float> player_rect_norm = player->get_player_rect();
+			cv::Point padd_pos = game2pixel(cv::Point2f(player_rect_norm.x, player_rect_norm.y));
+			cv::Point padd_dim = game2pixel(cv::Point2f(player_rect_norm.width, player_rect_norm.height));
+			player_rect.x = padd_pos.x;
+			player_rect.y = padd_pos.y;
+			player_rect.w = padd_dim.x;
+			player_rect.h = padd_dim.y;
+			SDL_RenderCopy(renderer, player_tex, NULL, &player_rect);
+		}
+
+		//Render paddle area
 		SDL_Texture* paddle_tex = player->get_paddle_texture();
 		if (paddle_tex) {
 			SDL_Rect paddle_rect;
@@ -193,6 +210,9 @@ void GameBoard::render_board_all() {
 			SDL_RenderCopy(renderer, paddle_tex, NULL, &paddle_rect);
 		}
 	}
+
+
+
 
 	// Render ball
 	render_ball();
