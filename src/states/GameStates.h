@@ -16,26 +16,43 @@
 #include "../GameBoard.h"
 //class KinectPongGame; // Forward declare this
 
-class GameState {
-public:
-	virtual void handle_events(KinectInput* kinect_input) = 0;
-	virtual void handle_logic() = 0;
-	virtual void render() = 0;
-	virtual ~GameState(){};
-protected:
-	KinectPongGame* m_game;
-};
-
 enum GameStates {
 	STATE_NULL,
 	STATE_INTRO,
+	STATE_RESET,
 	STATE_KINECTVIEW,
 	STATE_WAITFORPLAYERS,
 	STATE_PLAY_SERVE,
 	STATE_PLAY_SCORE,
 	STATE_PLAYING,
-	STATE_SHOWSCORE,
+	STATE_FINAL_SCORE,
 	STATE_EXIT
+};
+
+class GameState {
+public:
+	virtual void handle_events(KinectInput* kinect_input) = 0;
+	virtual void handle_logic() = 0;
+	virtual void render() = 0;
+	virtual ~GameState() {}
+protected:
+	KinectPongGame* m_game;
+	void default_event_handler() {
+		SDL_Event e;
+		while (SDL_PollEvent(&e)) {
+			switch (e.type) {
+			case SDL_QUIT:
+				m_game->set_next_state(STATE_EXIT);
+				break;
+			case SDL_KEYDOWN:
+				if (e.key.keysym.sym == SDLK_ESCAPE) {
+					std::cout << "Escape pressed" << std::endl;
+					m_game->set_next_state(STATE_EXIT);
+				}
+				break;
+			}
+		} // end SDL_PollEvent
+	}
 };
 
 //----------------------------------
@@ -111,6 +128,31 @@ private:
 	SDL_Texture* m_face_player_1;
 	SDL_Texture* m_face_player_2;
 	SDL_Texture* m_text_scored;
+};
+
+class FinalScoreState : public GameState {
+public:
+	FinalScoreState(KinectPongGame*);
+	~FinalScoreState();
+	void handle_events(KinectInput*);
+	void handle_logic();
+	void render();
+private:
+	Uint32 m_tick_start;
+	SDL_Texture* m_player_faces[2];
+	SDL_Surface* m_player_names[2];
+	SDL_Surface* m_player_scores[2];
+
+	SDL_Texture* m_text_score;
+};
+
+class ResetState : public GameState {
+public:
+	ResetState(KinectPongGame*);
+	~ResetState();
+	void handle_events(KinectInput*);
+	void handle_logic();
+	void render();
 };
 
 class WaitForPlayerState : public GameState{

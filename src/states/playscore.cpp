@@ -77,7 +77,7 @@ PlayerScoredState::~PlayerScoredState() {
 }
 
 void PlayerScoredState::handle_events(KinectInput* kinect) {
-
+	default_event_handler();
 }
 
 void PlayerScoredState::handle_logic() {
@@ -101,7 +101,12 @@ void PlayerScoredState::handle_logic() {
 	}
 
 	if ((SDL_GetTicks() - m_tick_start) / 1000.0 > 5.0) {
-		m_game->set_next_state(STATE_PLAY_SERVE);
+		if (m_game->get_gameboard()->gameover()) {
+			m_game->set_next_state(STATE_FINAL_SCORE);
+		}
+		else {
+			m_game->set_next_state(STATE_PLAY_SERVE);
+		}
 	}
 }
 
@@ -171,7 +176,7 @@ void PlayerScoredState::render() {
 		break;
 	}
 	//text_rect = fit_texture_inside(m_text_scored, &scores_text_rect);
-	text_rect.y += m_game->norm2pixel_y(0.1);
+	text_rect.y += m_game->norm2pixel_y(0.2);
 	SDL_RenderCopy(renderer, m_text_scored, NULL, &text_rect);
 
 	// Present and delay

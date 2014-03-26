@@ -14,15 +14,13 @@
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_image.h>
 
-GameBoard::GameBoard(KinectPongGame* game) {
+GameBoard::GameBoard(KinectPongGame* game) : m_max_score(1) {
 	m_game = game;
 
-	for (int i=0; i < 2; ++i) {
-		m_players[i] = new Player(this);
+	for (int i = 0; i < 2; ++i) {
+		m_players[i] = NULL;
 	}
 
-	m_players[0]->set_name("Player 1");
-	m_players[1]->set_name("Player 2");
 	m_player_1_score_surf = NULL;
 	m_player_2_score_surf = NULL;
 
@@ -40,13 +38,15 @@ GameBoard::GameBoard(KinectPongGame* game) {
 
 	had_collision = false;
 
-	m_event = GAMEBOARD_EVENT_NONE;
-
 	// Graphics related
 	m_ball_tex = IMG_LoadTexture(m_game->renderer(), "window_icon.png");
 	if (!m_ball_tex) {
 		std::cout << "Error: IMG_LoadTexture: " << SDL_GetError() << std::endl;
 	}
+
+
+	// Reset the game
+	reset();
 }
 
 GameBoard::~GameBoard() {
@@ -249,7 +249,6 @@ void GameBoard::render_scores() {
 		dst.y = m_game->norm2pixel_y(0.05);
 		dst.w = scale * surf->w;
 		dst.h = scale * surf->h;
-		std::cout << i << " " << dst.x << ", " << dst.y << " " << dst.w << " x " << dst.h << std::endl;
 		SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surf);
 		SDL_RenderCopy(renderer, tex, NULL, &dst);
 		SDL_DestroyTexture(tex);
@@ -269,8 +268,6 @@ void GameBoard::update_score_textures() {
 		SDL_FreeSurface(m_player_2_score_surf);
 	}
 
-
-	SDL_Surface* surf;
 	SDL_Color text_color;
 	text_color.r = text_color.g = text_color.b = text_color.a = 255;
 	char score_buf[8];
@@ -278,14 +275,48 @@ void GameBoard::update_score_textures() {
 	sprintf(score_buf, "%d", get_player(0)->score());
 	std::cout << "Player 1 score " << get_player(0)->score() << " and " << score_buf << std::endl;
 	m_player_1_score_surf = TTF_RenderText_Blended(font, score_buf, text_color);
-	if (!surf) {
+	if (!m_player_1_score_surf) {
 		std::cout << "Error: " << TTF_GetError() << std::endl;
 	}
 
 	sprintf(score_buf, "%d", get_player(1)->score());
 	std::cout << "Player 2 score " << get_player(1)->score() << " and " << score_buf << std::endl;
 	m_player_2_score_surf = TTF_RenderText_Blended(font, score_buf, text_color);
-	if (!surf) {
+	if (!m_player_2_score_surf) {
 		std::cout << "Error: " << TTF_GetError() << std::endl;
 	}
+}
+
+void GameBoard::reset() {
+	for (int i=0; i < 2; ++i) {
+		if (m_players[i]) {
+			delete m_players[i];
+		}
+
+		m_players[i] = new Player(this);
+	}
+
+	m_players[0]->set_name("Player 1");
+	m_players[1]->set_name("Player 2");
+
+	if (m_player_1_score_surf) {
+		delete m_player_1_score_surf;
+	}
+	if (m_player_2_score_surf) {
+		delete m_player_2_score_surf;
+	}
+	m_player_1_score_surf = NULL;
+	m_player_2_score_surf = NULL;
+
+	m_event = GAMEBOARD_EVENT_NONE;
+
+}
+
+bool GameBoard::gameover() {
+	for (int i=0; i < 2; ++i) {
+		if (get_player(i)->score() >= m_max_score) {
+			return true;
+		}
+	}
+	return false;
 }
