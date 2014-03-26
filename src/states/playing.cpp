@@ -79,6 +79,8 @@ void PlayingState::handle_events(KinectInput* kinect) {
 		case SDL_KEYDOWN:
 			if (e.key.keysym.sym == SDLK_ESCAPE)
 				m_game->set_next_state(STATE_EXIT);
+			else
+				m_game->set_next_state(STATE_FINAL_SCORE);
 			break;
 		}
 	} // end SDL_PollEvent
