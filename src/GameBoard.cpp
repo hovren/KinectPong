@@ -225,6 +225,7 @@ void GameBoard::render_board_all() {
 			paddle_rect.h = padd_dim.y;
 			SDL_RenderCopy(renderer, paddle_tex, NULL, &paddle_rect);
 		}
+
 	}
 
 
@@ -268,6 +269,28 @@ void GameBoard::render_scores() {
 		SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surf);
 		SDL_RenderCopy(renderer, tex, NULL, &dst);
 		SDL_DestroyTexture(tex);
+	}
+}
+
+void GameBoard::render_normals() {
+	// Render paddle gradient
+	SDL_Renderer* renderer = m_game->renderer();
+
+	SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+	for (int i=0; i < 2; ++i) {
+		Player* player = get_player(i);
+		std::vector<cv::Point2f> contour_points;
+		std::vector<cv::Point2f> gradient_value;
+		player->get_paddle_gradients(contour_points, gradient_value);
+		const int line_length = 32; // pixels
+		//std::cout << "There are " << contour_points.size() << " points" << std::endl;
+		for (int j=0; j < contour_points.size(); ++j) {
+			cv::Point start_pos = game2pixel(contour_points[j]);
+			cv::Point2f gradient = gradient_value[j];
+			cv::Point end_pos = start_pos + cv::Point(line_length*gradient.x, line_length*gradient.y);
+			//std::cout << start_pos << " to " << end_pos << std::endl;
+			SDL_RenderDrawLine(renderer, start_pos.x, start_pos.y, end_pos.x, end_pos.y);
+		}
 	}
 }
 

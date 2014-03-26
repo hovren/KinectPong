@@ -38,6 +38,7 @@ PlayingState::PlayingState(KinectPongGame* game) {
 		cv::Mat mask = player->get_paddle_mask();
 	}
 	m_last_tick = 0;
+	m_draw_normals = false;
 }
 
 PlayingState::~PlayingState() {
@@ -79,6 +80,8 @@ void PlayingState::handle_events(KinectInput* kinect) {
 		case SDL_KEYDOWN:
 			if (e.key.keysym.sym == SDLK_ESCAPE)
 				m_game->set_next_state(STATE_EXIT);
+			else if (e.key.keysym.sym == SDLK_n)
+				m_draw_normals = ! m_draw_normals;
 			break;
 		}
 	} // end SDL_PollEvent
@@ -118,6 +121,10 @@ void PlayingState::render() {
 	GameBoard* gameboard = m_game->get_gameboard();
 
 	gameboard->render_board_all();
+
+	if (m_draw_normals) {
+		gameboard->render_normals();
+	}
 
 	// Present and delay
 	SDL_RenderPresent(renderer);

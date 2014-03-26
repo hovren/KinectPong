@@ -47,6 +47,7 @@ public:
 	void render_ball();
 	void render_scores();
 	void render_board_all();
+	void render_normals();
 
 private:
 	KinectPongGame* m_game;

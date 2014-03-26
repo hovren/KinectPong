@@ -106,6 +106,7 @@ public:
 	void render();
 
 private:
+	bool m_draw_normals;
 	Uint32 m_last_tick;
 };
 

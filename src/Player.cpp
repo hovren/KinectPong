@@ -59,24 +59,16 @@ void Player::paddle_input(cv::Mat mask) {
 	m_paddle_rect.width = ((float) bb.width) / mask.cols;
 	m_paddle_rect.height = ((float) bb.height) / mask.rows;
 
-	// clear previous contours
+	// clear previous contours and gradietns
 	m_paddle_contour.clear();
+	m_paddle_gradient.clear();
 
 	if(contours.size() == 0){
 		//set mask and gradients to zero and return
 		cv::Mat empty_gradient = cv::Mat::zeros(mask.rows, mask.cols, CV_32FC2);
-		empty_gradient.copyTo(m_paddle_gradient);
+		//empty_gradient.copyTo(m_paddle_gradient);
 		mask_roi.copyTo(m_paddle_mask);
 		return;
-	}
-
-	// Update the paddle contours coordinates to lie within bounding box
-
-	for (unsigned int i=0; i < contours[0].size(); ++i) {
-		cv::Point contour_point_updated;
-		contour_point_updated.x = contours[0][i].x - bb.x;
-		contour_point_updated.y = contours[0][i].y - bb.y;
-		m_paddle_contour.push_back(contour_point_updated);
 	}
 
 //	std::cout << "Found bounding box at " << bb.x << ", " << bb.y << " dim " << bb.width << " x " << bb.height;
@@ -91,10 +83,32 @@ void Player::paddle_input(cv::Mat mask) {
 	cv::Sobel(mask_blurred, deriv[0], CV_32F, 1, 0, 3);
 	cv::Sobel(mask_blurred, deriv[1], CV_32F, 0, 1, 3);
 
-	cv::blur(deriv[0], deriv[0], cv::Size(5,5));
-	cv::blur(deriv[1], deriv[1], cv::Size(5,5));
+	cv::GaussianBlur(deriv[0], deriv[0], cv::Size(11,11), 1.0, 1.0);
+	cv::GaussianBlur(deriv[1], deriv[1], cv::Size(11,11), 1.0, 1.0);
+//	cv::blur(deriv[0], deriv[0], cv::Size(16,16));
+//	cv::blur(deriv[1], deriv[1], cv::Size(16,16));
+	cv::Mat gradient_image;
+	cv::merge(deriv, gradient_image);
 
-	cv::merge(deriv, m_paddle_gradient);
+	// Extract normals at contour points
+	// Remove contour points with zero gradient
+	for (unsigned int i=0; i < contours[0].size(); ++i) {
+		cv::Point abs_pos = cv::Point(contours[0][i].x, contours[0][i].y); // Position inside bounding box
+		cv::Point rel_pos = cv::Point(abs_pos.x - bb.x, abs_pos.y - bb.y); // Position inside bounding box
+		cv::Point2f gpos((float) abs_pos.x / m_input_dimensions.x, (float) abs_pos.y / m_input_dimensions.y); // Game position
+		cv::Vec2f g = gradient_image.at<cv::Vec2f>(rel_pos.y, rel_pos.x);
+		float norm = cv::norm(g);
+
+		if (norm > std::numeric_limits<float>::epsilon()) {
+			g *= (1.0 / norm);
+			m_paddle_gradient.push_back(cv::Point2f(g.val[0], g.val[1]));
+			m_paddle_contour.push_back(gpos);
+		}
+		else {
+			//std::cout << "Skipped point with norm " << norm << std::endl;
+		}
+	}
+
 
 	// Set new texture
 	if (m_paddle_tex) {
@@ -178,15 +192,12 @@ bool Player::collision_line(cv::Point2f ball_pos, cv::Point2f ball_velocity,
 	float max_t = cv::norm(ball_velocity*dt);
 	bool collided = false;
 	for (unsigned int i=0; i < m_paddle_contour.size(); ++i) {
-		cv::Point2f pos;
-		pos.x = m_paddle_rect.x + ((float) m_paddle_contour[i].x) / m_input_dimensions.x;
-		pos.y = m_paddle_rect.y + ((float) m_paddle_contour[i].y) / m_input_dimensions.y;
-
+		cv::Point2f gpos = m_paddle_contour[i];
 		float s;
-		float d = line_to_point_distance(pos, ball_pos, n, s);
+		float d = line_to_point_distance(gpos, ball_pos, n, s);
 
 		if (d < ball_radius) {
-			cv::Point2f ap = pos - ball_pos;
+			cv::Point2f ap = gpos - ball_pos;
 			float a = ap.x*n.x + ap.y*n.y;
 			float b = a*a - ap.x*ap.x - ap.y*ap.y + ball_radius*ball_radius;
 			float t1 = a + sqrt(b);
@@ -195,13 +206,8 @@ bool Player::collision_line(cv::Point2f ball_pos, cv::Point2f ball_velocity,
 			if ((t > 0) && (t <= max_t) && (t < best_t)) {
 				best_t = t;
 				collision_point = ball_pos + t*n;
-				cv::Point cpos = m_paddle_contour[i];
-				//std::cout << "testing gradient pixel at " << cpos << " ";
-				cv::Vec2f gradient = m_paddle_gradient.at<cv::Vec2f>(cpos.y, cpos.x);
-				float gradient_norm = cv::norm(gradient);
-				//std::cout << "value " << gradient << " norm " << gradient_norm << " mask val " << (unsigned int) m_paddle_mask.at<unsigned char>(cpos.x, cpos.y) << std::endl;
-				collision_normal.val[0] = gradient.val[0] / gradient_norm;
-				collision_normal.val[1] = gradient.val[1] / gradient_norm;
+				collision_normal.val[0] = m_paddle_gradient[i].x;
+				collision_normal.val[1] = m_paddle_gradient[i].y;
 				collided = true;
 			}
 		}
@@ -210,4 +216,23 @@ bool Player::collision_line(cv::Point2f ball_pos, cv::Point2f ball_velocity,
 	collision_normal *= (1.0 / cv::norm(collision_normal));
 
 	return collided;
+}
+
+void Player::get_paddle_gradients(std::vector<cv::Point2f>& contour,
+		std::vector<cv::Point2f>& gradient) {
+	contour.assign(m_paddle_contour.begin(), m_paddle_contour.end());
+	gradient.assign(m_paddle_gradient.begin(), m_paddle_gradient.end());
+#if 0
+	//contour.assign(m_paddle_contour.begin(), m_paddle_contour.end());
+	gradient.clear();
+	contour.clear();
+	for (int i=0; i < m_paddle_contour.size(); ++i) {
+		cv::Point pos = m_paddle_contour[i];
+		cv::Point2f gpos((float) pos.x / m_input_dimensions.x, (float) pos.y / m_input_dimensions.y);
+		cv::Vec2f g = m_paddle_gradient.at<cv::Vec2f>(pos.y, pos.x);
+		g *= (1.0 / cv::norm(g));
+		gradient.push_back(cv::Point2f(g.val[0], g.val[1]));
+		contour.push_back(gpos);
+	}
+#endif
 }
