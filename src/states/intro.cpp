@@ -48,7 +48,7 @@ void IntroState::handle_events(KinectInput* kinect) {
 			m_game->set_next_state(STATE_EXIT);
 			break;
 		case SDL_KEYDOWN:
-			m_game->set_next_state(STATE_KINECTVIEW);
+			m_game->set_next_state(STATE_RESET);
 			break;
 		}
 	} // end SDL_PollEvent

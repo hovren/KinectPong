@@ -167,6 +167,9 @@ void KinectPongGame::change_state() {
 		case STATE_INTRO:
 			m_current_state = new IntroState(this);
 			break;
+		case STATE_RESET:
+			m_current_state = new ResetState(this);
+			break;
 		case STATE_WAITFORPLAYERS:
 			m_current_state = new WaitForPlayerState(this);
 			break;
@@ -182,6 +185,9 @@ void KinectPongGame::change_state() {
 		case STATE_PLAY_SCORE:
 			std::cout << "Player scored" << std::endl;
 			m_current_state = new PlayerScoredState(this);
+			break;
+		case STATE_FINAL_SCORE:
+			m_current_state = new FinalScoreState(this);
 			break;
 		}
 

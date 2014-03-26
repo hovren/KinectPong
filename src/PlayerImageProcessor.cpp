@@ -422,3 +422,8 @@ void PlayerImageProcessor::get_right_player_face_image(cv::Mat& face_image)
 {
 	m_right_player_face_image.copyTo(face_image);
 }
+
+void PlayerImageProcessor::reset() {
+	m_tracking_left = false;
+	m_tracking_right = false;
+}

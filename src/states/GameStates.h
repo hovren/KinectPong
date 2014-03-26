@@ -29,12 +29,13 @@ protected:
 enum GameStates {
 	STATE_NULL,
 	STATE_INTRO,
+	STATE_RESET,
 	STATE_KINECTVIEW,
 	STATE_WAITFORPLAYERS,
 	STATE_PLAY_SERVE,
 	STATE_PLAY_SCORE,
 	STATE_PLAYING,
-	STATE_SHOWSCORE,
+	STATE_FINAL_SCORE,
 	STATE_EXIT
 };
 
@@ -111,6 +112,31 @@ private:
 	SDL_Texture* m_face_player_1;
 	SDL_Texture* m_face_player_2;
 	SDL_Texture* m_text_scored;
+};
+
+class FinalScoreState : public GameState {
+public:
+	FinalScoreState(KinectPongGame*);
+	~FinalScoreState();
+	void handle_events(KinectInput*);
+	void handle_logic();
+	void render();
+private:
+	Uint32 m_tick_start;
+	SDL_Texture* m_player_faces[2];
+	SDL_Surface* m_player_names[2];
+	SDL_Surface* m_player_scores[2];
+
+	SDL_Texture* m_text_score;
+};
+
+class ResetState : public GameState {
+public:
+	ResetState(KinectPongGame*);
+	~ResetState();
+	void handle_events(KinectInput*);
+	void handle_logic();
+	void render();
 };
 
 class WaitForPlayerState : public GameState{

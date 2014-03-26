@@ -48,6 +48,8 @@ public:
 	int calc_area(cv::Mat mask);
 	void select_largest(cv::Mat& label_image, int n_regions);
 
+	void reset();
+
 private:
 	cv::CascadeClassifier m_face_detector;
 	cv::Rect m_left_player_face_position;
