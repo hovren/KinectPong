@@ -17,6 +17,8 @@
 
 #define GAMEBOARD_MAX_SCORE 5
 
+static Uint32 last_update = 0;
+
 GameBoard::GameBoard(KinectPongGame* game) : m_max_score(GAMEBOARD_MAX_SCORE) {
 	m_game = game;
 
@@ -126,6 +128,11 @@ void GameBoard::update(float dt) {
 	if ((m_ball_pos.x > 1.0) || (m_ball_pos.y > 1.0) || (m_ball_pos.x < 0) || (m_ball_pos.y < 0)) {
 		std::cout << "Ball out of bounds, re-serve" << std::endl;
 		m_game->set_next_state(STATE_PLAY_SERVE);
+	}
+
+	if (SDL_GetTicks() > (last_update + 1000)) {
+		std::cout << "Current ball position " << m_ball_pos << " ball velocity " << m_ball_velocity << std::endl;
+		last_update = SDL_GetTicks();
 	}
 }
 

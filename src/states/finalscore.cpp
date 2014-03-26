@@ -143,13 +143,13 @@ void FinalScoreState::render() {
 		SDL_Rect face_rect;
 		w = m_player_faces[i].w;
 		h = m_player_faces[i].h;
-		std::cout << i << " face surface dims " << w << " x " << h << std::endl;
+		//std::cout << i << " face surface dims " << w << " x " << h << std::endl;
 		float face_scale = FACE_WIDTH / m_game->pixel2norm_y(h);
 		face_rect.x = m_game->norm2pixel_x(midx) - face_scale*w/2;
 		face_rect.y = m_game->norm2pixel_y(FACE_POS_Y);
 		face_rect.w = face_scale*w;
 		face_rect.h = face_scale*h;
-		std::cout << i << " Face rect " << face_rect.x << ", " << face_rect.y << " " << face_rect.w << " x " << face_rect.h << std::endl;
+		//std::cout << i << " Face rect " << face_rect.x << ", " << face_rect.y << " " << face_rect.w << " x " << face_rect.h << std::endl;
 		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 		SDL_RenderDrawRect(renderer, &face_rect); // Draw rectangle, because there might not be a face
 		SDL_RenderCopy(renderer, m_player_faces[i].texture, NULL, &face_rect);
