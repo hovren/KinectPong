@@ -48,6 +48,9 @@ PlayingState::~PlayingState() {
 void PlayingState::handle_events(KinectInput* kinect) {
 	cv::Mat depth, rgb;
 	if (m_game->get_kinect()->poll_data(rgb, depth)) {
+		//cv::GaussianBlur(depth, depth, cv::Size(11, 11), 3, 3);
+		//cv::medianBlur(depth, depth, 11);
+
 		cv::flip(rgb, rgb, 1);
 		cv::flip(depth, depth, 1);
 

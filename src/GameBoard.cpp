@@ -33,7 +33,7 @@ GameBoard::GameBoard(KinectPongGame* game) : m_max_score(GAMEBOARD_MAX_SCORE) {
 	m_ball_pos.y = 0.12;
 	m_ball_velocity.x = -1.8;
 	m_ball_velocity.y = 0.0;
-	m_ball_radius = 0.01;
+	m_ball_radius = 0.02;
 
 	// Screen size and position in normed world coordinates
 	m_game_screen_dims.x = 1.0;
