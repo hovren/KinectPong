@@ -197,9 +197,6 @@ void GameBoard::render_board_all() {
 	// Background
 	render_board_background();
 
-	// Current Score
-	render_scores();
-
 	// Render paddle
 	for (int i=0; i < 2; ++i) {
 		Player* player = get_player(i);
@@ -236,8 +233,8 @@ void GameBoard::render_board_all() {
 
 	}
 
-
-
+	// Current Score
+	render_scores();
 
 	// Render ball
 	render_ball();
