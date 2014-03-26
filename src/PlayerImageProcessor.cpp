@@ -90,6 +90,18 @@ bool PlayerImageProcessor::init_player_faces(cv::Mat rgb_frame, cv::Mat depth_fr
 		int row = (int)round(m_left_player_face_position.y+m_left_player_face_position.height/2);
 		int col = (int)round(m_left_player_face_position.x+m_left_player_face_position.width/2);
 		m_left_player_face_depth = depth_frame.at<int>(row, col);
+
+		//Increase face ROI size by 3x
+		cv::Rect roi(m_left_player_face_position);
+		roi.x = std::max(0, roi.x - roi.width);
+		int max_width = frame_gray.cols - roi.x;
+		roi.width = std::min(3*roi.width, max_width);
+		roi.y = std::max(0, roi.y - roi.height);
+		int max_height = frame_gray.rows - roi.y;
+		roi.height = std::min(3*roi.height, max_height);
+
+		m_left_player_face_position = roi;
+
 		m_tracking_left = true;
 		//std::cout << "Got left face" << std::endl;
 	}
@@ -103,6 +115,18 @@ bool PlayerImageProcessor::init_player_faces(cv::Mat rgb_frame, cv::Mat depth_fr
 		int row = (int)round(m_right_player_face_position.y+m_right_player_face_position.height/2);
 		int col = (int)round(m_right_player_face_position.x+m_right_player_face_position.width/2);
 		m_right_player_face_depth = depth_frame.at<int>(row, col);
+
+		//Increase face ROI size by 3x
+		cv::Rect roi(m_right_player_face_position);
+		roi.x = std::max(0, roi.x - roi.width);
+		int max_width = frame_gray.cols - roi.x;
+		roi.width = std::min(3*roi.width, max_width);
+		roi.y = std::max(0, roi.y - roi.height);
+		int max_height = frame_gray.rows - roi.y;
+		roi.height = std::min(3*roi.height, max_height);
+
+		m_right_player_face_position = roi;
+
 		m_tracking_right = true;
 		//std::cout << "Got right face" << std::endl;
 	}
@@ -172,6 +196,18 @@ void PlayerImageProcessor::find_left_player_face(cv::Mat frame_gray, cv::Mat dep
 		int row = (int)round(m_left_player_face_position.y+m_left_player_face_position.height/2);
 		int col = (int)round(m_left_player_face_position.x+m_left_player_face_position.width/2);
 		m_left_player_face_depth = depth_frame.at<int>(row, col);
+
+		//Increase face ROI size by 3x
+		cv::Rect large_roi(m_left_player_face_position);
+		large_roi.x = std::max(0, large_roi.x - large_roi.width);
+		int max_width = frame_gray.cols - large_roi.x;
+		large_roi.width = std::min(3*large_roi.width, max_width);
+		large_roi.y = std::max(0, large_roi.y - large_roi.height);
+		int max_height = frame_gray.rows - large_roi.y;
+		large_roi.height = std::min(3*large_roi.height, max_height);
+
+		m_left_player_face_position = large_roi;
+
 		m_tracking_left = true;
 	}
 	else{
@@ -201,6 +237,18 @@ void PlayerImageProcessor::find_right_player_face(cv::Mat frame_gray, cv::Mat de
 		int row = (int)round(m_right_player_face_position.y+m_right_player_face_position.height/2);
 		int col = (int)round(m_right_player_face_position.x+m_right_player_face_position.width/2);
 		m_right_player_face_depth = depth_frame.at<int>(row, col);
+
+		//Increase face ROI size by 3x
+		cv::Rect large_roi(m_right_player_face_position);
+		large_roi.x = std::max(0, large_roi.x - large_roi.width);
+		int max_width = frame_gray.cols - large_roi.x;
+		large_roi.width = std::min(3*large_roi.width, max_width);
+		large_roi.y = std::max(0, large_roi.y - large_roi.height);
+		int max_height = frame_gray.rows - large_roi.y;
+		large_roi.height = std::min(3*large_roi.height, max_height);
+
+		m_right_player_face_position = large_roi;
+
 		m_tracking_right = true;
 	}
 	else{
@@ -294,54 +342,62 @@ void PlayerImageProcessor::set_player_masks(cv::Mat depth_frame)
 		left_half_mask.copyTo(left_player_half_image);
 		double left_min_val, left_max_val;
 		cv::Point left_min, left_max;
-		cv::minMaxLoc(float_depth, &left_min_val, &left_max_val, &left_min, &left_max, m_left_player_mask);
+		cv::Mat left_depth(float_depth, left_half);
+		cv::Mat left_contact_half(m_left_player_contact_mask, left_half);
+
+		cv::minMaxLoc(left_depth, &left_min_val, &left_max_val, &left_min, &left_max, left_player_half_image);
 		cv::Mat left_contact_threshold_float, left_contact_threshold;
-		cv::threshold(float_depth, left_contact_threshold_float, left_min_val+200, 255, CV_THRESH_BINARY_INV);
+		cv::threshold(left_depth, left_contact_threshold_float, left_min_val+200, 255, CV_THRESH_BINARY_INV);
 		left_contact_threshold_float.convertTo(left_contact_threshold, CV_8UC1, 1);
-		m_left_player_contact_mask.setTo(0);
+		left_contact_half.setTo(0);
+
 		if((left_min.x > 0) && (left_min.y > 0)){
-			m_left_player_contact_mask.at<uchar>(left_min.y, left_min.x) = 255;
-			int left_area = calc_area(m_left_player_mask);
+			left_contact_half.at<uchar>(left_min.y, left_min.x) = 255;
+			int left_area = calc_area(left_player_half_image);
 			int left_contact_area = 0;
 			int old_left_contact_area = 1;
 			while((left_contact_area < left_area/10) && (old_left_contact_area != left_contact_area)){
 				old_left_contact_area = left_contact_area;
 				cv::Mat new_mask;
-				cv::dilate(m_left_player_contact_mask, new_mask, strel, cv::Point(-1, -1), 5);
-				new_mask.copyTo(m_left_player_contact_mask, left_contact_threshold.mul(m_left_player_mask));
-				left_contact_area = calc_area(m_left_player_contact_mask);
+				cv::dilate(left_contact_half, new_mask, strel, cv::Point(-1, -1), 5);
+				new_mask.copyTo(left_contact_half, left_contact_threshold.mul(left_player_half_image));
+				left_contact_area = calc_area(left_contact_half);
 			}
 		}
 		//smooth outlines
-		cv::dilate(m_left_player_contact_mask, m_left_player_contact_mask, strel, cv::Point(-1, -1), 3);
-		cv::erode(m_left_player_contact_mask, m_left_player_contact_mask, strel, cv::Point(-1, -1), 3);
+		cv::dilate(left_contact_half, left_contact_half, strel, cv::Point(-1, -1), 3);
+		cv::erode(left_contact_half, left_contact_half, strel, cv::Point(-1, -1), 3);
 	}
 
 	if(right_area > 0){
 		right_half_mask.copyTo(right_player_half_image);
 		double right_min_val, right_max_val;
 		cv::Point right_min, right_max;
-		cv::minMaxLoc(float_depth, &right_min_val, &right_max_val, &right_min, &right_max, m_right_player_mask);
+		cv::Mat right_depth(float_depth, right_half);
+		cv::Mat right_contact_half(m_right_player_contact_mask, right_half);
+
+		cv::minMaxLoc(right_depth, &right_min_val, &right_max_val, &right_min, &right_max, right_player_half_image);
 		cv::Mat right_contact_threshold_float, right_contact_threshold;
-		cv::threshold(float_depth, right_contact_threshold_float, right_min_val+200, 255, CV_THRESH_BINARY_INV);
+		cv::threshold(right_depth, right_contact_threshold_float, right_min_val+200, 255, CV_THRESH_BINARY_INV);
 		right_contact_threshold_float.convertTo(right_contact_threshold, CV_8UC1, 1);
-		m_right_player_contact_mask.setTo(0);
+		right_contact_half.setTo(0);
+
 		if((right_min.x > 0) && (right_min.y > 0)){
-			m_right_player_contact_mask.at<uchar>(right_min.y, right_min.x) = 255;
-			int right_area = calc_area(m_right_player_mask);
+			right_contact_half.at<uchar>(right_min.y, right_min.x) = 255;
+			int right_area = calc_area(right_player_half_image);
 			int right_contact_area = 0;
 			int old_right_contact_area = 1;
 			while((right_contact_area < right_area/10) && (old_right_contact_area != right_contact_area)){
 				old_right_contact_area = right_contact_area;
 				cv::Mat new_mask;
-				cv::dilate(m_right_player_contact_mask, new_mask, strel, cv::Point(-1, -1), 5);
-				new_mask.copyTo(m_right_player_contact_mask, right_contact_threshold.mul(m_right_player_mask));
-				right_contact_area = calc_area(m_right_player_contact_mask);
+				cv::dilate(right_contact_half, new_mask, strel, cv::Point(-1, -1), 5);
+				new_mask.copyTo(right_contact_half, right_contact_threshold.mul(right_player_half_image));
+				right_contact_area = calc_area(right_contact_half);
 			}
 		}
 		//smooth outlines
-		cv::dilate(m_right_player_contact_mask, m_right_player_contact_mask, strel, cv::Point(-1, -1), 3);
-		cv::erode(m_right_player_contact_mask, m_right_player_contact_mask, strel, cv::Point(-1, -1), 3);
+		cv::dilate(right_contact_half, right_contact_half, strel, cv::Point(-1, -1), 3);
+		cv::erode(right_contact_half, right_contact_half, strel, cv::Point(-1, -1), 3);
 	}
 
 }

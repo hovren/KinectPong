@@ -79,7 +79,7 @@ void PlayingState::handle_events(KinectInput* kinect) {
 		case SDL_QUIT:
 		case SDL_KEYDOWN:
 			if (e.key.keysym.sym == SDLK_ESCAPE)
-				m_game->set_next_state(STATE_EXIT);
+				m_game->set_next_state(STATE_FINAL_SCORE);
 			else if (e.key.keysym.sym == SDLK_n)
 				m_draw_normals = ! m_draw_normals;
 			break;
@@ -121,10 +121,6 @@ void PlayingState::render() {
 	GameBoard* gameboard = m_game->get_gameboard();
 
 	gameboard->render_board_all();
-
-	if (m_draw_normals) {
-		gameboard->render_normals();
-	}
 
 	// Present and delay
 	SDL_RenderPresent(renderer);
