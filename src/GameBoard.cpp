@@ -70,6 +70,33 @@ cv::Point2f reflect(cv::Point2f in, cv::Vec2f normal) {
 
 void GameBoard::update(float dt) {
 	had_collision = false;
+
+	// Collide with players
+	cv::Point2f normed_velocity = m_ball_velocity * (1.0 / cv::norm(m_ball_velocity));
+
+	for (int i=0; i < 2; ++i) {
+		cv::Vec2f collision_normal;
+		cv::Point2f collision_point;
+		if (m_players[i]->collision_line(m_ball_pos, m_ball_velocity, m_ball_radius, dt, collision_normal, collision_point)) {
+			m_ball_pos = collision_point;
+//			if (normed_velocity.dot(collision_normal) < 0) {
+//					normed_velocity *= -1;
+//			}
+			cv::Point2f reflection = reflect(normed_velocity, collision_normal);
+			std::cout << SDL_GetTicks() << " Collided. Input velocity (normed)" << normed_velocity << " speed="<< cv::norm(m_ball_velocity) << " dot=" << reflection.dot(normed_velocity) << " collision normal " << collision_normal <<  " reflection " << reflection << std::endl;
+			m_ball_velocity = cv::norm(m_ball_velocity) * reflection;
+			std::cout << "New velocity " << m_ball_velocity << std::endl;
+			had_collision = true;
+		}
+	}
+
+	// If collided with player, then ball velocity and position has been changed already
+	if (had_collision) {
+		return;
+	}
+
+	// Now check collision with walls
+	// Begin by updating the position
 	m_ball_pos.x += m_ball_velocity.x * dt;
 	m_ball_pos.y += m_ball_velocity.y * dt;
 
@@ -103,25 +130,6 @@ void GameBoard::update(float dt) {
 		//m_ball_vel_x = m_ball_vel_y = 0;
 		//std::cout << "Hit wall " << m_ball_pos_x << ", " << m_ball_pos_y << " radius " << m_ball_radius << std::endl;
 		had_collision = true;
-	}
-
-	// Collide with players
-	cv::Vec2f collision_normal;
-	cv::Point2f normed_velocity = m_ball_velocity * (1.0 / cv::norm(m_ball_velocity));
-	if (normed_velocity.dot(collision_normal) < 0) {
-		normed_velocity *= -1;
-	}
-	for (int i=0; i < 2; ++i) {
-		cv::Vec2f collision_normal;
-		cv::Point2f collision_point;
-		if (m_players[i]->collision_line(m_ball_pos, m_ball_velocity, m_ball_radius, dt, collision_normal, collision_point)) {
-			m_ball_pos = collision_point;
-			cv::Point2f reflection = reflect(normed_velocity, collision_normal);
-			std::cout << "Collided. Input velocity (normed)" << normed_velocity << " speed="<< cv::norm(m_ball_velocity) << " dot=" << reflection.dot(normed_velocity) << " collision normal " << collision_normal <<  " reflection " << reflection << std::endl;
-			m_ball_velocity = cv::norm(m_ball_velocity) * reflection;
-			std::cout << "New velocity " << m_ball_velocity << std::endl;
-			had_collision = true;
-		}
 	}
 
 	// Check out of bounds and reset

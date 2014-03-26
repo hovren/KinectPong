@@ -125,6 +125,9 @@ void PlayingState::render() {
 
 	gameboard->render_board_all();
 
+	if (m_draw_normals)
+		gameboard->render_normals();
+
 	// Present and delay
 	SDL_RenderPresent(renderer);
 	SDL_Delay(10);

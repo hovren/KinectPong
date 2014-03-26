@@ -192,7 +192,15 @@ bool Player::collision_line(cv::Point2f ball_pos, cv::Point2f ball_velocity,
 	float max_t = cv::norm(ball_velocity*dt);
 	bool collided = false;
 	for (unsigned int i=0; i < m_paddle_contour.size(); ++i) {
+		cv::Point2f gradient = m_paddle_gradient[i];
 		cv::Point2f gpos = m_paddle_contour[i];
+
+		// Do not collide unless the surface normal and velocity agrees
+		// Surface normals point inwards the blobs
+		if (gradient.dot(n) < 0) {
+			continue;
+		}
+
 		float s;
 		float d = line_to_point_distance(gpos, ball_pos, n, s);
 
@@ -205,16 +213,13 @@ bool Player::collision_line(cv::Point2f ball_pos, cv::Point2f ball_velocity,
 			float t = ((t1 > 0) && (t1 < t2)) ? t1 : t2;
 			if ((t > 0) && (t <= max_t) && (t < best_t)) {
 				best_t = t;
-				collision_point = ball_pos + t*n;
+				collision_point = ball_pos + 0.99*t*n; // 0.99 to not end up exactly at the collision point
 				collision_normal.val[0] = m_paddle_gradient[i].x;
 				collision_normal.val[1] = m_paddle_gradient[i].y;
 				collided = true;
 			}
 		}
 	}
-
-	collision_normal *= (1.0 / cv::norm(collision_normal));
-
 	return collided;
 }
 
