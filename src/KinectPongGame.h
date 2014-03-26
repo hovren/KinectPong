@@ -38,6 +38,7 @@ public:
 	PlayerImageProcessor* get_image_processor() { return &m_image_processor;}
 	RoboRef* get_roboref() { return &m_roboref;}
 	SDL_Texture* texture_from_mat(cv::Mat&);
+	SDL_Surface* surface_from_mat(cv::Mat&);
 	SDL_Palette* get_gray_palette() { return m_gray_palette; }
 	bool has_roboref() {return m_has_roboref;}
 	float get_aspect_ratio();

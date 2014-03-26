@@ -139,9 +139,13 @@ public:
 	void render();
 private:
 	Uint32 m_tick_start;
-	SDL_Texture* m_player_faces[2];
+	struct { SDL_Texture* texture;
+			 int w;
+			 int h;
+		} m_player_faces[2];
 	SDL_Surface* m_player_names[2];
 	SDL_Surface* m_player_scores[2];
+	SDL_Texture* m_tmp;
 
 	SDL_Texture* m_text_score;
 };

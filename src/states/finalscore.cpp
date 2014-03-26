@@ -66,15 +66,20 @@ FinalScoreState::FinalScoreState(KinectPongGame* game) {
 	// Faces
 	cv::Mat face;
 	m_game->get_image_processor()->get_right_player_face_image(face);
-	m_player_faces[0] = m_game->texture_from_mat(face);
+	m_player_faces[0].texture = m_game->texture_from_mat(face);
+	m_player_faces[0].w = face.cols;
+	m_player_faces[0].h = face.rows;
+
 	m_game->get_image_processor()->get_left_player_face_image(face);
-	m_player_faces[1] = m_game->texture_from_mat(face);
+	m_player_faces[1].texture = m_game->texture_from_mat(face);
+	m_player_faces[1].w = face.cols;
+	m_player_faces[1].h = face.rows;
 }
 
 FinalScoreState::~FinalScoreState() {
 	// Do nothing
 	for (int i=0; i < 2; ++i) {
-		SDL_DestroyTexture(m_player_faces[i]);
+		SDL_DestroyTexture(m_player_faces[i].texture);
 		SDL_FreeSurface(m_player_names[i]);
 	}
 	SDL_DestroyTexture(m_text_score);
@@ -131,22 +136,29 @@ void FinalScoreState::render() {
 
 	int winner = (gameboard->get_player(0)->score() > gameboard->get_player(1)->score()) ? 0 : 1;
 
+	int w, h;
 	for (int i=0; i < 2; ++i) {
 		float midx = 0.25 + 0.5*i;
 		// Face
 		SDL_Rect face_rect;
-		face_rect.x = m_game->norm2pixel_x(midx - FACE_WIDTH/2);
+		w = m_player_faces[i].w;
+		h = m_player_faces[i].h;
+		std::cout << i << " face surface dims " << w << " x " << h << std::endl;
+		float face_scale = FACE_WIDTH / m_game->pixel2norm_y(h);
+		face_rect.x = m_game->norm2pixel_x(midx) - face_scale*w/2;
 		face_rect.y = m_game->norm2pixel_y(FACE_POS_Y);
-		face_rect.w = m_game->norm2pixel_x(FACE_WIDTH);
-		face_rect.h = m_game->norm2pixel_y(FACE_WIDTH);
+		face_rect.w = face_scale*w;
+		face_rect.h = face_scale*h;
+		std::cout << i << " Face rect " << face_rect.x << ", " << face_rect.y << " " << face_rect.w << " x " << face_rect.h << std::endl;
 		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 		SDL_RenderDrawRect(renderer, &face_rect); // Draw rectangle, because there might not be a face
-		SDL_RenderCopy(renderer, m_player_faces[i], NULL, &face_rect);
+		SDL_RenderCopy(renderer, m_player_faces[i].texture, NULL, &face_rect);
+		//SDL_DestroyTexture(face_tex);
 
 		// Name
 		SDL_Rect name_rect;
-		int w = m_player_names[i]->w;
-		int h = m_player_names[i]->h;
+		w = m_player_names[i]->w;
+		h = m_player_names[i]->h;
 		name_rect.x = m_game->norm2pixel_x(midx) - w/2;
 		name_rect.y = face_rect.y = m_game->norm2pixel_y(FACE_POS_Y + FACE_WIDTH + 0.1);
 		name_rect.w = w;
