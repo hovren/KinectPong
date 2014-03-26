@@ -47,7 +47,15 @@ protected:
 			case SDL_KEYDOWN:
 				if (e.key.keysym.sym == SDLK_ESCAPE) {
 					std::cout << "Escape pressed" << std::endl;
-					m_game->set_next_state(STATE_EXIT);
+					switch (m_game->current_state()) {
+					case STATE_PLAYING:
+					case STATE_PLAY_SERVE:
+					case STATE_PLAY_SCORE:
+						m_game->set_next_state(STATE_FINAL_SCORE);
+						break;
+					default:
+						m_game->set_next_state(STATE_EXIT);
+					}
 				}
 				break;
 			}
