@@ -40,6 +40,7 @@ public:
 	SDL_Texture* texture_from_mat(cv::Mat&);
 	SDL_Surface* surface_from_mat(cv::Mat&);
 	SDL_Palette* get_gray_palette() { return m_gray_palette; }
+	int current_state() { return m_state_id; }
 	bool has_roboref() {return m_has_roboref;}
 	float get_aspect_ratio();
 	int norm2pixel_x(float x);
