@@ -102,7 +102,10 @@ void WaitForPlayerState::handle_events(KinectInput* input)
 			m_game->set_next_state(STATE_EXIT);
 			break;
 		case SDL_KEYDOWN:
-			m_game->set_next_state(STATE_PLAY_SERVE);
+			if(e.key.keysym.sym == SDLK_ESCAPE)
+				m_game->set_next_state(STATE_EXIT);
+			else
+				m_game->set_next_state(STATE_PLAY_SERVE);
 			break;
 		}
 	} // end SDL_PollEvent
