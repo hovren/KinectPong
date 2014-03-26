@@ -7,6 +7,7 @@
 
 #include "GameBoard.h"
 #include "Player.h"
+#include "states/GameStates.h"
 
 #include <iostream>
 #include <cstdlib>
@@ -119,6 +120,12 @@ void GameBoard::update(float dt) {
 			std::cout << "New velocity " << m_ball_velocity << std::endl;
 			had_collision = true;
 		}
+	}
+
+	// Check out of bounds and reset
+	if ((m_ball_pos.x > 1.0) || (m_ball_pos.y > 1.0) || (m_ball_pos.x < 0) || (m_ball_pos.y < 0)) {
+		std::cout << "Ball out of bounds, re-serve" << std::endl;
+		m_game->set_next_state(STATE_PLAY_SERVE);
 	}
 }
 
