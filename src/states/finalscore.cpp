@@ -160,7 +160,7 @@ void FinalScoreState::render() {
 		w = m_player_names[i]->w;
 		h = m_player_names[i]->h;
 		name_rect.x = m_game->norm2pixel_x(midx) - w/2;
-		name_rect.y = face_rect.y = m_game->norm2pixel_y(FACE_POS_Y + FACE_WIDTH + 0.1);
+		name_rect.y = m_game->norm2pixel_y(FACE_POS_Y + FACE_WIDTH + 0.1);
 		name_rect.w = w;
 		name_rect.h = h;
 		SDL_Texture* text_tex = SDL_CreateTextureFromSurface(renderer, m_player_names[i]);
