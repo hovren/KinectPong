@@ -37,6 +37,10 @@ PlayerImageProcessor::PlayerImageProcessor() {
 	empty_frame.copyTo(m_right_player_mask);
 	empty_frame.copyTo(m_left_player_contact_mask);
 	empty_frame.copyTo(m_right_player_contact_mask);
+	empty_frame.copyTo(m_new_left_player_contact_mask);
+	empty_frame.copyTo(m_new_right_player_contact_mask);
+	empty_frame.copyTo(m_old_left_player_contact_mask);
+	empty_frame.copyTo(m_old_right_player_contact_mask);
 
 	cv::Mat empty_face = cv::Mat::zeros(cv::Size(50, 50), CV_8UC3);
 	empty_face.copyTo(m_left_player_face_image);
@@ -351,6 +355,9 @@ void PlayerImageProcessor::set_player_masks(cv::Mat depth_frame)
 		left_contact_threshold_float.convertTo(left_contact_threshold, CV_8UC1, 1);
 		left_contact_half.setTo(0);
 
+		cv::dilate(left_player_half_image, left_player_half_image, strel, cv::Point(-1, -1), 1);
+		cv::erode(left_player_half_image, left_player_half_image, strel, cv::Point(-1, -1), 1);
+
 		if((left_min.x > 0) && (left_min.y > 0)){
 			left_contact_half.at<uchar>(left_min.y, left_min.x) = 255;
 			int left_area = calc_area(left_player_half_image);
@@ -381,6 +388,9 @@ void PlayerImageProcessor::set_player_masks(cv::Mat depth_frame)
 		cv::threshold(right_depth, right_contact_threshold_float, right_min_val+200, 255, CV_THRESH_BINARY_INV);
 		right_contact_threshold_float.convertTo(right_contact_threshold, CV_8UC1, 1);
 		right_contact_half.setTo(0);
+
+		cv::dilate(right_player_half_image, right_player_half_image, strel, cv::Point(-1, -1), 1);
+		cv::erode(right_player_half_image, right_player_half_image, strel, cv::Point(-1, -1), 1);
 
 		if((right_min.x > 0) && (right_min.y > 0)){
 			right_contact_half.at<uchar>(right_min.y, right_min.x) = 255;
