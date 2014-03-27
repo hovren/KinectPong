@@ -197,41 +197,11 @@ void GameBoard::render_board_all() {
 	// Background
 	render_board_background();
 
-	// Render paddle
-	for (int i=0; i < 2; ++i) {
-		Player* player = get_player(i);
+	// Silhouette
+	render_silhouette();
 
-		// Render player silhouettes
-		SDL_Texture* player_tex = player->get_player_texture();
-		if (player_tex) {
-			SDL_Rect player_rect;
-			//cv::Point2f paddle_pos(m_player_data[player].paddle_x, m_player_data[player].paddle_y);
-			cv::Rect_<float> player_rect_norm = player->get_player_rect();
-			cv::Point padd_pos = game2pixel(cv::Point2f(player_rect_norm.x, player_rect_norm.y));
-			cv::Point padd_dim = game2pixel(cv::Point2f(player_rect_norm.width, player_rect_norm.height));
-			player_rect.x = padd_pos.x;
-			player_rect.y = padd_pos.y;
-			player_rect.w = padd_dim.x;
-			player_rect.h = padd_dim.y;
-			SDL_RenderCopy(renderer, player_tex, NULL, &player_rect);
-		}
-
-		//Render paddle area
-		SDL_Texture* paddle_tex = player->get_paddle_texture();
-		if (paddle_tex) {
-			SDL_Rect paddle_rect;
-			//cv::Point2f paddle_pos(m_player_data[player].paddle_x, m_player_data[player].paddle_y);
-			cv::Rect_<float> paddle_rect_norm = player->get_paddle_rect();
-			cv::Point padd_pos = game2pixel(cv::Point2f(paddle_rect_norm.x, paddle_rect_norm.y));
-			cv::Point padd_dim = game2pixel(cv::Point2f(paddle_rect_norm.width, paddle_rect_norm.height));
-			paddle_rect.x = padd_pos.x;
-			paddle_rect.y = padd_pos.y;
-			paddle_rect.w = padd_dim.x;
-			paddle_rect.h = padd_dim.y;
-			SDL_RenderCopy(renderer, paddle_tex, NULL, &paddle_rect);
-		}
-
-	}
+	// Paddle
+	render_paddle();
 
 	// Current Score
 	render_scores();
@@ -295,6 +265,50 @@ void GameBoard::render_normals() {
 			cv::Point end_pos = start_pos + cv::Point(line_length*gradient.x, line_length*gradient.y);
 			//std::cout << start_pos << " to " << end_pos << std::endl;
 			SDL_RenderDrawLine(renderer, start_pos.x, start_pos.y, end_pos.x, end_pos.y);
+		}
+	}
+}
+
+void GameBoard::render_silhouette() {
+	SDL_Renderer* renderer = m_game->renderer();
+
+	for (int i=0; i < 2; ++i) {
+		Player* player = get_player(i);
+		SDL_Texture* player_tex = player->get_player_texture();
+		if (player_tex) {
+			SDL_Rect player_rect;
+			//cv::Point2f paddle_pos(m_player_data[player].paddle_x, m_player_data[player].paddle_y);
+			cv::Rect_<float> player_rect_norm = player->get_player_rect();
+			cv::Point padd_pos = game2pixel(cv::Point2f(player_rect_norm.x, player_rect_norm.y));
+			cv::Point padd_dim = game2pixel(cv::Point2f(player_rect_norm.width, player_rect_norm.height));
+			player_rect.x = padd_pos.x;
+			player_rect.y = padd_pos.y;
+			player_rect.w = padd_dim.x;
+			player_rect.h = padd_dim.y;
+			SDL_RenderCopy(renderer, player_tex, NULL, &player_rect);
+		}
+	}
+}
+
+void GameBoard::render_paddle() {
+	SDL_Renderer* renderer = m_game->renderer();
+
+	// Render paddle
+	for (int i=0; i < 2; ++i) {
+		Player* player = get_player(i);
+		//Render paddle area
+		SDL_Texture* paddle_tex = player->get_paddle_texture();
+		if (paddle_tex) {
+			SDL_Rect paddle_rect;
+			//cv::Point2f paddle_pos(m_player_data[player].paddle_x, m_player_data[player].paddle_y);
+			cv::Rect_<float> paddle_rect_norm = player->get_paddle_rect();
+			cv::Point padd_pos = game2pixel(cv::Point2f(paddle_rect_norm.x, paddle_rect_norm.y));
+			cv::Point padd_dim = game2pixel(cv::Point2f(paddle_rect_norm.width, paddle_rect_norm.height));
+			paddle_rect.x = padd_pos.x;
+			paddle_rect.y = padd_pos.y;
+			paddle_rect.w = padd_dim.x;
+			paddle_rect.h = padd_dim.y;
+			SDL_RenderCopy(renderer, paddle_tex, NULL, &paddle_rect);
 		}
 	}
 }

@@ -35,6 +35,37 @@ ServePlayState::~ServePlayState() {
 }
 
 void ServePlayState::handle_events(KinectInput* kinect) {
+	cv::Mat depth, rgb;
+	if (m_game->get_kinect()->poll_data(rgb, depth)) {
+		//cv::GaussianBlur(depth, depth, cv::Size(11, 11), 3, 3);
+		//cv::medianBlur(depth, depth, 11);
+
+		cv::flip(rgb, rgb, 1);
+		cv::flip(depth, depth, 1);
+
+		m_game->get_image_processor()->set_player_masks(depth);
+
+		//face detector is too slow to run in this loop
+	    //m_game->get_image_processor()->find_player_faces(rgb, depth);
+
+		cv::Mat right_player_mask;
+		m_game->get_image_processor()->get_right_player_mask(right_player_mask);
+		m_game->get_gameboard()->get_player(0)->player_input(right_player_mask);
+
+		cv::Mat left_player_mask;
+		m_game->get_image_processor()->get_left_player_mask(left_player_mask);
+		m_game->get_gameboard()->get_player(1)->player_input(left_player_mask);
+
+		cv::Mat right_contact_mask;
+		m_game->get_image_processor()->get_right_player_contact_mask(right_contact_mask);
+		m_game->get_gameboard()->get_player(0)->paddle_input(right_contact_mask);
+
+		cv::Mat left_contact_mask;
+		m_game->get_image_processor()->get_left_player_contact_mask(left_contact_mask);
+		m_game->get_gameboard()->get_player(1)->paddle_input(left_contact_mask);
+	}
+
+
 	default_event_handler();
 }
 
@@ -79,8 +110,18 @@ void ServePlayState::render() {
 	// Board background
 	gameboard->render_board_background();
 
+	//Sulhouette and paddle
+	gameboard->render_silhouette();
+	gameboard->render_paddle();
+
 	// Render score
 	gameboard->render_scores();
+
+	// Tone it down
+	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 128);
+	SDL_RenderFillRect(renderer, NULL);
+	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
 
 	// Draw countdown circles
 	int seconds_left = m_countdown - (SDL_GetTicks() - m_tick_start) / 1000.0;
