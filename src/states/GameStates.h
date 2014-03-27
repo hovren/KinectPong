@@ -132,11 +132,13 @@ public:
 	void render();
 private:
 	Uint32 m_tick_start;
-	SDL_Texture* m_text_player_1;
-	SDL_Texture* m_text_player_2;
-	SDL_Texture* m_face_player_1;
-	SDL_Texture* m_face_player_2;
-	SDL_Texture* m_text_scored;
+	struct { SDL_Texture* texture;
+				 int w;
+				 int h;
+			} m_player_faces[2];
+	SDL_Surface* m_player_names[2];
+	SDL_Surface* m_player_scores[2];
+	SDL_Surface* m_text_scored;
 };
 
 class FinalScoreState : public GameState {
