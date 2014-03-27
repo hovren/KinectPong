@@ -352,8 +352,8 @@ void PlayerImageProcessor::set_player_masks(cv::Mat depth_frame)
 		double left_min_val, left_max_val;
 		cv::Point left_min, left_max;
 		cv::Mat left_depth(float_depth, left_half);
-		//m_left_player_contact_mask.copyTo(m_old_left_player_contact_mask);
-		cv::Mat left_contact_half(m_left_player_contact_mask, left_half);
+		m_new_left_player_contact_mask.copyTo(m_old_left_player_contact_mask);
+		cv::Mat left_contact_half(m_new_left_player_contact_mask, left_half);
 
 		cv::minMaxLoc(left_depth, &left_min_val, &left_max_val, &left_min, &left_max, left_player_half_image);
 		cv::Mat left_contact_threshold_float, left_contact_threshold;
@@ -381,6 +381,7 @@ void PlayerImageProcessor::set_player_masks(cv::Mat depth_frame)
 		cv::dilate(left_contact_half, left_contact_half, strel, cv::Point(-1, -1), 1);
 		cv::erode(left_contact_half, left_contact_half, strel, cv::Point(-1, -1), 1);
 	}
+	m_left_player_contact_mask = m_old_left_player_contact_mask + m_new_left_player_contact_mask;
 
 
 
@@ -389,8 +390,8 @@ void PlayerImageProcessor::set_player_masks(cv::Mat depth_frame)
 		double right_min_val, right_max_val;
 		cv::Point right_min, right_max;
 		cv::Mat right_depth(float_depth, right_half);
-		//m_right_player_contact_mask.copyTo(m_old_right_player_contact_mask);
-		cv::Mat right_contact_half(m_right_player_contact_mask, right_half);
+		m_new_right_player_contact_mask.copyTo(m_old_right_player_contact_mask);
+		cv::Mat right_contact_half(m_new_right_player_contact_mask, right_half);
 
 		cv::minMaxLoc(right_depth, &right_min_val, &right_max_val, &right_min, &right_max, right_player_half_image);
 		cv::Mat right_contact_threshold_float, right_contact_threshold;
@@ -418,6 +419,7 @@ void PlayerImageProcessor::set_player_masks(cv::Mat depth_frame)
 		cv::dilate(right_contact_half, right_contact_half, strel, cv::Point(-1, -1), 1);
 		cv::erode(right_contact_half, right_contact_half, strel, cv::Point(-1, -1), 1);
 	}
+	m_right_player_contact_mask = m_old_right_player_contact_mask + m_new_right_player_contact_mask;
 
 }
 
