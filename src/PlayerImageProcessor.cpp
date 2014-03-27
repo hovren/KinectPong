@@ -37,10 +37,10 @@ PlayerImageProcessor::PlayerImageProcessor() {
 	empty_frame.copyTo(m_right_player_mask);
 	empty_frame.copyTo(m_left_player_contact_mask);
 	empty_frame.copyTo(m_right_player_contact_mask);
-	empty_frame.copyTo(m_new_left_player_contact_mask);
-	empty_frame.copyTo(m_new_right_player_contact_mask);
-	empty_frame.copyTo(m_old_left_player_contact_mask);
-	empty_frame.copyTo(m_old_right_player_contact_mask);
+	//empty_frame.copyTo(m_new_left_player_contact_mask);
+	//empty_frame.copyTo(m_new_right_player_contact_mask);
+	//empty_frame.copyTo(m_old_left_player_contact_mask);
+	//empty_frame.copyTo(m_old_right_player_contact_mask);
 
 	cv::Mat empty_face = cv::Mat::zeros(cv::Size(50, 50), CV_8UC3);
 	empty_face.copyTo(m_left_player_face_image);
@@ -309,6 +309,11 @@ void PlayerImageProcessor::set_player_masks(cv::Mat depth_frame)
 	cv::Mat player_mask;
 	threshold_depth_frame(float_depth, player_mask);
 
+	if(!player_mask.empty()){
+		float_depth.setTo(m_far_limit + 10, player_mask == 0);
+		cv::GaussianBlur(float_depth, float_depth, cv::Size(5, 5), 2, 2);
+	}
+
 	//find contours and label them
 	std::vector<std::vector<cv::Point> > contours;
 	std::vector<cv::Vec4i> hierarchy;
@@ -372,9 +377,11 @@ void PlayerImageProcessor::set_player_masks(cv::Mat depth_frame)
 			}
 		}
 		//smooth outlines
-		cv::dilate(left_contact_half, left_contact_half, strel, cv::Point(-1, -1), 3);
-		cv::erode(left_contact_half, left_contact_half, strel, cv::Point(-1, -1), 3);
+		cv::dilate(left_contact_half, left_contact_half, strel, cv::Point(-1, -1), 1);
+		cv::erode(left_contact_half, left_contact_half, strel, cv::Point(-1, -1), 1);
 	}
+
+
 
 	if(right_area > 0){
 		right_half_mask.copyTo(right_player_half_image);
