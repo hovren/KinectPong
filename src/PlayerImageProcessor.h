@@ -64,6 +64,10 @@ private:
 	cv::Mat m_right_player_mask;
 	cv::Mat m_left_player_contact_mask;
 	cv::Mat m_right_player_contact_mask;
+	//cv::Mat m_new_left_player_contact_mask;
+	//cv::Mat m_new_right_player_contact_mask;
+	//cv::Mat m_old_left_player_contact_mask;
+	//cv::Mat m_old_right_player_contact_mask;
 	double m_near_limit;
 	double m_far_limit;
 	unsigned int m_min_contour_size;

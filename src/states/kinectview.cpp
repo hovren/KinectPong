@@ -28,7 +28,6 @@ void KinectViewState::handle_events(KinectInput* kinect) {
 		cv::flip(depth, depth, 1);
 
 		m_game->get_image_processor()->set_player_masks(depth);
-		m_game->get_image_processor()->find_player_faces(rgb, depth);
 
 		SDL_DestroyTexture(m_rgb_tex);
 		SDL_DestroyTexture(m_depth_tex);
